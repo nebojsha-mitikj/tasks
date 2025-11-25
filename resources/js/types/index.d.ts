@@ -17,6 +17,11 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface NavSection {
+    title?: string;
+    items: NavItem[];
+}
+
 export type AppPageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {

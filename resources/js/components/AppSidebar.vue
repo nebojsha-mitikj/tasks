@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -11,32 +10,78 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { today, upcoming, history } from '@/routes/tasks';
+import { recurringTemplates } from '@/routes/recurring';
+import { getLabels, getLabel } from '@/routes/labels';
+import { type NavSection, type AppPageProps } from '@/types';
+import { Link, usePage } from '@inertiajs/vue3';
+import { Calendar, Star, Repeat, History, Tag, Circle } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
+type Label = {
+    id: number;
+    name: string;
+};
+
+const page = usePage<AppPageProps<{ labels: Label[] }>>();
+
+const navSections: NavSection[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'Tasks',
+        items: [
+            {
+                title: 'Today',
+                href: today(),
+                icon: Star,
+            },
+            {
+                title: 'Upcoming',
+                href: upcoming(),
+                icon: Calendar,
+            },
+        ]
     },
+
+    {
+        title: 'Setup',
+        items: [
+            {
+                title: 'Recurring',
+                href: recurringTemplates(),
+                icon: Repeat,
+            }
+        ]
+    },
+
+    {
+        title: 'Activity',
+        items: [
+            {
+                title: 'History',
+                href: history(),
+                icon: History,
+            },
+        ]
+    },
+
+    {
+        title: 'Labels',
+        items: [
+            ...page.props.labels.map((label) => ({
+                title: label.name,
+                href: getLabel(label.id),
+                icon: Circle,
+            })),
+            {
+                title: 'Manage Labels',
+                href: getLabels(),
+                icon: Tag,
+            },
+        ]
+    },
+
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
 </script>
 
 <template>
@@ -45,7 +90,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="today()">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
@@ -54,11 +99,14 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain
+                v-for="section in navSections"
+                :key="section.title"
+                :items="section.items"
+                :title="section.title"/>
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
             <NavUser />
         </SidebarFooter>
     </Sidebar>
