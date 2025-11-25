@@ -10,8 +10,7 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 require __DIR__.'/settings.php';
+require __DIR__.'/tasks.php';
+require __DIR__.'/recurring.php';
+require __DIR__.'/labels.php';
