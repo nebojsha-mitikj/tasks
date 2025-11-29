@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
@@ -22,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Inertia::share([
             'labels' => fn () => auth()->check()
-                ? auth()->user()->labels()->orderBy('name')->get(['id','name'])
+                ? auth()->user()->labels()->orderBy('name')->get()
                 : [],
         ]);
     }
