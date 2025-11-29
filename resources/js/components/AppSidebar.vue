@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { today, upcoming, history } from '@/routes/tasks';
 import { recurringTemplates } from '@/routes/recurring';
-import { getLabels, getLabel } from '@/routes/labels';
+import { index as getLabels, show as getLabel } from '@/routes/labels';
 import { type NavSection, type AppPageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Calendar, Star, Repeat, History, Tag, Circle } from 'lucide-vue-next';

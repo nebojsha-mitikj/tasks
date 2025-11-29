@@ -4,7 +4,10 @@ use App\Http\Controllers\LabelController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::group(['middleware' => 'auth', 'prefix' => 'labels'], function () {
-    Route::get('/', [LabelController::class, 'index'])->name('labels.getLabels');
-    Route::get('/{label}', [LabelController::class, 'show'])->name('labels.getLabel');
+Route::middleware('auth')->group(function () {
+    Route::resource('labels', LabelController::class)
+        ->except(['create', 'edit'])
+        ->middlewareFor('show', 'can:view,label')
+        ->middlewareFor('update', 'can:update,label')
+        ->middlewareFor('destroy', 'can:delete,label');
 });

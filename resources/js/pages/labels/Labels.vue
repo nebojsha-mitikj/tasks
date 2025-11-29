@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { getLabels } from '@/routes/labels';
+import { index as getLabels } from '@/routes/labels';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 
