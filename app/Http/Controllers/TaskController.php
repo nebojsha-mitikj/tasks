@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\TaskStatusEnum;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
@@ -20,6 +21,9 @@ class TaskController extends Controller
         $userId ??= auth()->id();
         return Task::query()
             ->where('user_id', $userId)
+            ->orderByRaw(
+                "FIELD(status, '" . implode("','", TaskStatusEnum::ordered()) . "')"
+            )
             ->orderBy('priority', 'desc')
             ->orderBy('created_at', 'desc');
     }
