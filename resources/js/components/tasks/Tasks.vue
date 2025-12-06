@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { Task } from '@/types/tasks/Task';
-import TaskTitle from '@/components/tasks/TaskTitle.vue';
-import TaskDescription from '@/components/tasks/TaskDescription.vue';
-import TaskStatus from '@/components/tasks/TaskStatus.vue';
-import TaskPriority from '@/components/tasks/TaskPriority.vue';
 import TaskActions from '@/components/tasks/TaskActions.vue';
+import TaskDescription from '@/components/tasks/TaskDescription.vue';
+import TaskPriority from '@/components/tasks/TaskPriority.vue';
+import TaskStatus from '@/components/tasks/TaskStatus.vue';
+import TaskTitle from '@/components/tasks/TaskTitle.vue';
+import type { Task } from '@/types/tasks/Task';
 
 const props = defineProps<{
     tasks: Task[];
@@ -29,7 +29,7 @@ const props = defineProps<{
                     <TaskPriority :task="task" />
                 </div>
 
-                <TaskActions class="flex items-center gap-2"/>
+                <TaskActions :task="task" class="flex items-center gap-2" />
             </div>
         </div>
 
