@@ -29,7 +29,6 @@ class StoreTaskRequest extends FormRequest
             'title' => 'required|string',
             'description' => 'nullable|string',
             'date' => 'required|date',
-            'status' => ['required', new Enum(TaskStatusEnum::class)],
             'priority' => ['required', new Enum(TaskPriorityEnum::class)]
         ];
     }
