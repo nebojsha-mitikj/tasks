@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\TaskStatusEnum;
 use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateStatusRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,6 +66,12 @@ class TaskController extends Controller
     {
         $task->update($request->validated());
         return back()->with('success', 'Task updated successfully.');
+    }
+
+    public function updateStatus(UpdateStatusRequest $request, Task $task): RedirectResponse
+    {
+        $task->update($request->validated());
+        return back()->with('success', 'Task status updated successfully.');
     }
 
     public function store(StoreTaskRequest $request): RedirectResponse

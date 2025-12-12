@@ -16,11 +16,6 @@ use Illuminate\Validation\Rules\Enum;
  */
 class StoreTaskRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
         return [
