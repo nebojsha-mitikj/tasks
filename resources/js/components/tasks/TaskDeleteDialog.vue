@@ -15,6 +15,7 @@ import type { Task } from '@/types/tasks/Task';
 import { router } from '@inertiajs/vue3';
 import { Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{ task: Task }>();
 
@@ -27,6 +28,7 @@ const deleteTask = (): void => {
         preserveScroll: true,
         onSuccess: () => {
             deleteDialog.value = false;
+            toast.success('Task deleted successfully.');
         },
         onFinish: () => {
             isDeleting.value = false;
