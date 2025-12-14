@@ -4,6 +4,8 @@ import { TaskStatus } from '@/enums/TaskStatus';
 import { router } from '@inertiajs/vue3';
 import { updateStatus } from '@/actions/App/Http/Controllers/TaskController';
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner'
+
 import {
     Tooltip,
     TooltipContent,
@@ -31,6 +33,9 @@ const updateStatusRequest = (): void => {
         },
         {
             preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Task status updated successfully.');
+            },
             onFinish: () => {
                 isUpdating.value = false;
             },
