@@ -35,6 +35,7 @@ import type { DateValue } from '@internationalized/date';
 import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 import { CalendarIcon, Plus } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const date = ref<DateValue | undefined>();
 const isSubmitting = ref<boolean>(false);
@@ -75,6 +76,7 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
         preserveScroll: true,
         onSuccess: () => {
             createDialog.value = false;
+            toast.success('Task created successfully.')
             resetForm();
         },
         onFinish: () => {
