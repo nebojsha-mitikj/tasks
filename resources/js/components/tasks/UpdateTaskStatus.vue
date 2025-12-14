@@ -4,8 +4,7 @@ import { TaskStatus } from '@/enums/TaskStatus';
 import { router } from '@inertiajs/vue3';
 import { updateStatus } from '@/actions/App/Http/Controllers/TaskController';
 import { computed, ref } from 'vue';
-import { toast } from 'vue-sonner'
-
+import { toast } from 'vue-sonner';
 import {
     Tooltip,
     TooltipContent,
@@ -13,9 +12,11 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Check, CircleDot } from 'lucide-vue-next';
+import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
 
 const props = defineProps<{ task: Task }>();
 const isUpdating = ref<boolean>(false);
+const showAlert = ref<boolean>(false);
 
 const updateStatusRequest = (): void => {
     if (isUpdating.value || props.task.status === TaskStatus.COMPLETED) {
@@ -52,15 +53,34 @@ const tooltipText = computed((): string => {
     }
     return '';
 });
+
+const alertDescription = computed((): string => {
+    if (props.task.status === TaskStatus.TO_DO) {
+        return 'This will mark the task as in progress.';
+    }
+    if (props.task.status === TaskStatus.IN_PROGRESS) {
+        return 'This will mark the task as completed.';
+    }
+    return '';
+});
 </script>
 
 <template>
+
+    <ConfirmAlert
+        :request-is-active="isUpdating"
+        :description="alertDescription"
+        confirm-label="Update status"
+        v-model:open="showAlert"
+        @submit="updateStatusRequest"
+    />
+
     <TooltipProvider v-if="props.task.status != TaskStatus.COMPLETED">
         <Tooltip>
             <TooltipTrigger as-child>
                 <button
                     :disabled="isUpdating"
-                    @click="updateStatusRequest"
+                    @click="showAlert = true"
                     class="cursor-pointer rounded p-1 transition hover:bg-muted"
                 >
                     <CircleDot
@@ -78,4 +98,5 @@ const tooltipText = computed((): string => {
             </TooltipContent>
         </Tooltip>
     </TooltipProvider>
+
 </template>
