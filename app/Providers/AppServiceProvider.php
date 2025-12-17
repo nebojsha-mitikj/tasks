@@ -26,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
             'labels' => fn () => auth()->check()
                 ? auth()->user()->labels()->orderBy('name')->get()
                 : [],
+            'flash' => [
+                'success' => fn () => session('success'),
+                'error'   => fn () => session('error'),
+            ],
         ]);
     }
 }

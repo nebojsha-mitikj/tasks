@@ -1,5 +1,6 @@
 import { InertiaLinkProps } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
+import { FlashProps } from '@/types/Flash';
 
 export interface Auth {
     user: User;
@@ -28,6 +29,7 @@ export type AppPageProps<
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    flash?: FlashProps;
     sidebarOpen: boolean;
 };
 
