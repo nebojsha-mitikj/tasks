@@ -7,12 +7,14 @@ import { today } from '@/routes/tasks';
 import { AppPageProps, type BreadcrumbItem } from '@/types';
 import { type Task } from '@/types/tasks/Task';
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import TaskCreateDialog from '@/components/tasks/TaskCreateDialog.vue';
+import { computed, ref } from 'vue';
+import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
+import { Plus } from 'lucide-vue-next';
 
 const page = usePage<AppPageProps<{ tasks: Task[] }>>();
 const tasks = computed(() => page.props.tasks ?? []);
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Today', href: today().url }];
+
 const completeCount = computed(
     () =>
         tasks.value.filter((task) => task.status === TaskStatus.COMPLETED)
@@ -24,6 +26,19 @@ const title = computed(() =>
         ? `Today - ${completeCount.value}/${tasks.value.length} complete`
         : 'Today',
 );
+
+const dialogOpen = ref<boolean>(false);
+const editingTask = ref<Task | null>(null);
+
+const editTask = (task: Task): void => {
+    editingTask.value = task;
+    dialogOpen.value = true;
+};
+
+const createTask = (): void => {
+    editingTask.value = null;
+    dialogOpen.value = true;
+};
 </script>
 
 <template>
@@ -34,8 +49,23 @@ const title = computed(() =>
                 :title="title"
                 subtitle="Your scheduled tasks for today."
             />
-            <Tasks :tasks="tasks" />
+            <Tasks :tasks="tasks" @edit="editTask"/>
         </div>
-        <TaskCreateDialog/>
+
+        <TaskFormDialog
+            v-model:open="dialogOpen"
+            :task="editingTask"
+        />
+
+        <button
+            @click="createTask"
+            type="button"
+            class="fixed right-8 bottom-8 inline-flex h-12 w-12
+                cursor-pointer items-center justify-center rounded-full
+                bg-primary text-primary-foreground shadow-lg transition
+                hover:bg-primary/90"
+        >
+            <Plus class="h-6 w-6" />
+        </button>
     </AppLayout>
 </template>

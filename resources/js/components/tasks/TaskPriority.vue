@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TaskStatus as TaskStatusEnum } from '@/enums/TaskStatus';
-import { Task } from '@/types/tasks/Task';
+import type { Task } from '@/types/tasks/Task';
 import {capitalizeFirstLetter} from '@/utils/string';
 
 const props = defineProps<{

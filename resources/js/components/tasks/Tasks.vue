@@ -9,6 +9,10 @@ import type { Task } from '@/types/tasks/Task';
 const props = defineProps<{
     tasks: Task[];
 }>();
+
+const emit = defineEmits<{
+    (e: 'edit', task: Task): void;
+}>();
 </script>
 
 <template>
@@ -29,7 +33,10 @@ const props = defineProps<{
                     <TaskPriority :task="task" />
                 </div>
 
-                <TaskActions :task="task" class="flex items-center gap-2" />
+                <TaskActions
+                    :task="task"
+                    @edit="emit('edit', $event)"
+                    class="flex items-center gap-2" />
             </div>
         </div>
 

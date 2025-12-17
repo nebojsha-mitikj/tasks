@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { store } from '@/actions/App/Http/Controllers/TaskController';
+import { store, update } from '@/actions/App/Http/Controllers/TaskController';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -9,7 +9,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
@@ -30,12 +29,15 @@ import { cn } from '@/lib/utils';
 import type { CreateTaskPayload } from '@/types/tasks/CreateTaskPayload';
 import { capitalizeFirstLetter } from '@/utils/string';
 import type { RequestPayload } from '@inertiajs/core';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import type { DateValue } from '@internationalized/date';
+import { parseDate } from '@internationalized/date';
 import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
-import { CalendarIcon, Plus } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { CalendarIcon } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
+import type { Task } from '@/types/tasks/Task';
+import { AppPageProps } from '@/types';
 
 const date = ref<DateValue | undefined>();
 const isSubmitting = ref<boolean>(false);
@@ -43,9 +45,22 @@ const title = ref<string>('');
 const description = ref<string>('');
 const priority = ref<TaskPriority | ''>('');
 const datePopover = ref<boolean>(false);
-const createDialog = ref<boolean>(false);
+const page = usePage<AppPageProps>();
 
 const df = new DateFormatter('en-US', { dateStyle: 'long' });
+
+const props = defineProps<{
+    task: Task | null;
+}>();
+
+const open = defineModel<boolean>('open', { default: false });
+
+const submitButtonText = computed(() => {
+    if (isSubmitting.value) {
+        return props.task === null ? 'Creating...' : 'Updating...';
+    }
+    return props.task === null ? 'Create task' : 'Update task';
+});
 
 const resetForm = () => {
     title.value = '';
@@ -53,6 +68,22 @@ const resetForm = () => {
     date.value = undefined;
     priority.value = '';
 };
+
+watch(
+    () => props.task,
+    (t: Task | null) => {
+        if (!t) {
+            resetForm();
+            return;
+        }
+        title.value = t.title;
+        description.value = t.description ?? '';
+        priority.value = t.priority;
+        const dateOnly = t.date.includes('T') ? t.date.split('T')[0] : t.date;
+        date.value = parseDate(dateOnly);
+    },
+    { immediate: true },
+);
 
 const submit = (): void => {
     if (
@@ -72,40 +103,45 @@ const submit = (): void => {
 
 const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
     isSubmitting.value = true;
-    router.post(store(), payload, {
+    const options = {
         preserveScroll: true,
         onSuccess: () => {
-            createDialog.value = false;
-            toast.success('Task created successfully.')
+            open.value = false;
+            toast.success(page.props.flash?.success ?? '');
             resetForm();
         },
         onFinish: () => {
             isSubmitting.value = false;
         },
-    });
-}
+    };
+    if (props.task === null) {
+        router.post(store(), payload, options);
+    } else {
+        router.put(update(props.task.id), payload, options);
+    }
+};
 </script>
 
 <template>
-    <Dialog v-model:open="createDialog">
-
-        <DialogTrigger as-child>
-            <button
-                type="button"
-                class="fixed right-8 bottom-8 inline-flex h-12 w-12
-                cursor-pointer items-center justify-center rounded-full
-                bg-primary text-primary-foreground shadow-lg transition
-                hover:bg-primary/90"
-            >
-                <Plus class="h-6 w-6" />
-            </button>
-        </DialogTrigger>
-
-        <DialogContent class="sm:max-w-2xl">
+    <Dialog v-model:open="open">
+        <DialogContent
+            class="sm:max-w-2xl"
+            @open-auto-focus="(e) => e.preventDefault()"
+        >
             <DialogHeader>
-                <DialogTitle>Add a new task</DialogTitle>
+                <DialogTitle>
+                    <template v-if="props.task == null">
+                        Add a new task
+                    </template>
+                    <template v-else> Update task </template>
+                </DialogTitle>
                 <DialogDescription>
-                    Create a task to plan your work.
+                    <template v-if="props.task == null">
+                        Create a task to plan your work.
+                    </template>
+                    <template v-else>
+                        Update this task to keep your plan on track.
+                    </template>
                 </DialogDescription>
             </DialogHeader>
 
@@ -184,7 +220,7 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
                 <Button
                     type="button"
                     variant="outline"
-                    @click="createDialog = false"
+                    @click="open = false"
                     :disabled="isSubmitting"
                 >
                     Cancel
@@ -195,7 +231,7 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
                     @click="submit"
                     :disabled="isSubmitting || !title || !date || !priority"
                 >
-                    {{ isSubmitting ? 'Creating...' : 'Create task' }}
+                    {{ submitButtonText }}
                 </Button>
             </DialogFooter>
         </DialogContent>
