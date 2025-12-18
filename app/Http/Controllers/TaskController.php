@@ -42,8 +42,10 @@ class TaskController extends Controller
     {
         return Inertia::render('tasks/Upcoming', [
             'tasks' => $this->tasksQuery()
-                ->whereDate('date', '>', today())
-                ->get()
+                ->whereBetween('date', [
+                    today(),
+                    today()->addDays(7),
+                ])->get()
         ]);
     }
 
