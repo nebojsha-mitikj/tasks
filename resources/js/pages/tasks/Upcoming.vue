@@ -15,7 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 </script>
 
 <template>
-    <Head title="Labels" />
+    <Head title="Upcoming" />
     <AppLayout :breadcrumbs="breadcrumbs">
         {{ tasks }}
     </AppLayout>

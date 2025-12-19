@@ -14,7 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 <template>
-    <Head title="Labels" />
+    <Head title="Recurring" />
     <AppLayout :breadcrumbs="breadcrumbs">
 
     </AppLayout>
