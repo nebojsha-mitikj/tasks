@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\TaskStatusEnum;
+use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -13,6 +14,13 @@ use Illuminate\Validation\Rules\Enum;
  */
 class UpdateStatusRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        /** @var Task $task */
+        $task = $this->route('task');
+        return $task->date->isToday();
+    }
+
     public function rules(): array
     {
         return [
