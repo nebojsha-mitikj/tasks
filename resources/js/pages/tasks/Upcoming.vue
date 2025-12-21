@@ -8,7 +8,6 @@ import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
 import TasksSection from '@/components/tasks/TasksSection.vue';
 import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
-import PageTitle from '@/components/tasks/PageTitle.vue';
 import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
