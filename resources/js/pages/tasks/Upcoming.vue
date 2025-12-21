@@ -9,30 +9,22 @@ import TasksSection from '@/components/tasks/TasksSection.vue';
 import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
 import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
+import { formatDate } from '@/utils/date';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
 
-const {tasksByDate} = defineProps<{
-    tasksByDate: Record<string, Task[]>
-}>()
+const { tasksByDate } = defineProps<{
+    tasksByDate: Record<string, Task[]>;
+}>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Upcoming', href: history().url }
+    { title: 'Upcoming', href: history().url },
 ];
-
-const formatDate = (date: string): string => {
-    return new Date(date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'short',
-        day: 'numeric',
-    });
-}
 </script>
 
 <template>
     <Head title="Upcoming" />
     <AppLayout :breadcrumbs="breadcrumbs">
-
         <EmptyTasksMessage
             v-if="Object.keys(tasksByDate).length === 0"
             title="No upcoming tasks"
@@ -47,6 +39,6 @@ const formatDate = (date: string): string => {
             :subtitle="'Your scheduled tasks for ' + date + '.'"
         />
         <TaskFormDialog v-model:open="dialogOpen" :task="editingTask" />
-        <CreateTaskButton @create="createTask"/>
+        <CreateTaskButton @create="createTask" />
     </AppLayout>
 </template>

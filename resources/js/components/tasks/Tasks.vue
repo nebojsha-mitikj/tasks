@@ -4,8 +4,8 @@ import TaskDescription from '@/components/tasks/TaskDescription.vue';
 import TaskPriority from '@/components/tasks/TaskPriority.vue';
 import TaskStatus from '@/components/tasks/TaskStatus.vue';
 import TaskTitle from '@/components/tasks/TaskTitle.vue';
-import type { Task } from '@/types/tasks/Task';
 import { usePageMatch } from '@/composables/usePageMatch';
+import type { Task } from '@/types/tasks/Task';
 
 const props = defineProps<{
     tasks: Task[];
@@ -15,7 +15,8 @@ const emit = defineEmits<{
     (e: 'edit', task: Task): void;
 }>();
 
-const { isMatch: isTodayMatch } = usePageMatch('tasks/Today')
+const { isMatch: isTodayMatch } = usePageMatch('tasks/Today');
+const { isMatch: isHistoryMatch } = usePageMatch('tasks/History');
 </script>
 
 <template>
@@ -31,15 +32,18 @@ const { isMatch: isTodayMatch } = usePageMatch('tasks/Today')
 
                     <TaskDescription :task="task" />
 
-                    <TaskStatus v-if="isTodayMatch" :task="task" />
-
-                    <TaskPriority :task="task" />
+                    <template v-if="!isHistoryMatch">
+                        <TaskStatus v-if="isTodayMatch" :task="task" />
+                        <TaskPriority :task="task" />
+                    </template>
                 </div>
 
                 <TaskActions
+                    v-if="!isHistoryMatch"
                     :task="task"
                     @edit="emit('edit', $event)"
-                    class="flex items-center gap-2" />
+                    class="flex items-center gap-2"
+                />
             </div>
         </div>
 
