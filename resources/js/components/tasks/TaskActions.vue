@@ -3,15 +3,19 @@ import TaskDeleteDialog from '@/components/tasks/TaskDeleteDialog.vue';
 import type { Task } from '@/types/tasks/Task';
 import { Pencil } from 'lucide-vue-next';
 import UpdateTaskStatus from '@/components/tasks/UpdateTaskStatus.vue';
+import { usePageMatch } from '@/composables/usePageMatch';
+
 const emit = defineEmits<{
     (e: 'edit', task: Task): void;
 }>();
 const props = defineProps<{ task: Task }>();
+const { isMatch: isTodayMatch } = usePageMatch('tasks/Today');
+
 </script>
 
 <template>
     <div>
-        <UpdateTaskStatus :task="props.task"></UpdateTaskStatus>
+        <UpdateTaskStatus v-if="isTodayMatch" :task="props.task"/>
 
         <button
             type="button"
