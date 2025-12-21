@@ -46,10 +46,10 @@ const updateStatusRequest = (): void => {
 
 const tooltipText = computed((): string => {
     if (props.task.status === TaskStatus.TO_DO) {
-        return 'In progress';
+        return 'Mark as in progress';
     }
     if (props.task.status === TaskStatus.IN_PROGRESS) {
-        return 'Complete';
+        return 'Mark as complete';
     }
     return '';
 });
@@ -81,15 +81,16 @@ const alertDescription = computed((): string => {
                 <button
                     :disabled="isUpdating"
                     @click="showAlert = true"
-                    class="cursor-pointer rounded p-1 transition hover:bg-muted"
+                    class="cursor-pointer rounded p-1 transition
+                    hover:bg-muted text-muted-foreground hover:text-foreground"
                 >
                     <CircleDot
                         v-if="props.task.status === TaskStatus.TO_DO"
-                        class="h-4 w-4 text-muted-foreground hover:text-foreground"
+                        class="h-4 w-4"
                     />
                     <Check
                         v-else-if="props.task.status === TaskStatus.IN_PROGRESS"
-                        class="h-4 w-4 text-muted-foreground hover:text-foreground"
+                        class="h-4 w-4"
                     />
                 </button>
             </TooltipTrigger>
