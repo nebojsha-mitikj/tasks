@@ -5,6 +5,7 @@ import TaskPriority from '@/components/tasks/TaskPriority.vue';
 import TaskStatus from '@/components/tasks/TaskStatus.vue';
 import TaskTitle from '@/components/tasks/TaskTitle.vue';
 import type { Task } from '@/types/tasks/Task';
+import { usePageMatch } from '@/composables/usePageMatch';
 
 const props = defineProps<{
     tasks: Task[];
@@ -13,6 +14,8 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'edit', task: Task): void;
 }>();
+
+const { isMatch: isTodayMatch } = usePageMatch('tasks/Today')
 </script>
 
 <template>
@@ -28,7 +31,7 @@ const emit = defineEmits<{
 
                     <TaskDescription :task="task" />
 
-                    <TaskStatus :task="task" />
+                    <TaskStatus v-if="isTodayMatch" :task="task" />
 
                     <TaskPriority :task="task" />
                 </div>
