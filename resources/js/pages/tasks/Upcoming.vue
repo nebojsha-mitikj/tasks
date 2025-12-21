@@ -9,6 +9,7 @@ import TasksSection from '@/components/tasks/TasksSection.vue';
 import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
 import PageTitle from '@/components/tasks/PageTitle.vue';
+import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
 
@@ -33,16 +34,10 @@ const formatDate = (date: string): string => {
     <Head title="Upcoming" />
     <AppLayout :breadcrumbs="breadcrumbs">
 
-
-        <div
+        <EmptyTasksMessage
             v-if="Object.keys(tasksByDate).length === 0"
-            class="mx-auto my-10 w-full max-w-4xl space-y-6"
-        >
-            <PageTitle
-                title="No upcoming tasks"
-                subtitle="You're all caught up for now."
-            />
-        </div>
+            title="No upcoming tasks"
+        />
 
         <TasksSection
             v-for="(tasks, date) in tasksByDate"
