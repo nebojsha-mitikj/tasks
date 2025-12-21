@@ -17,12 +17,12 @@ use Inertia\Response;
 class TaskController extends Controller
 {
 
-    private function tasksQuery(?int $userId = null): Builder
+    private function tasksQuery(?int $userId = null, bool $latestFirst = false): Builder
     {
         $userId ??= auth()->id();
         return Task::query()
             ->where('user_id', $userId)
-            ->orderBy('date')
+            ->orderBy('date', $latestFirst ? 'DESC' : 'ASC')
             ->orderByRaw(
                 "FIELD(status, '" . implode("','", TaskStatusEnum::ordered()) . "')"
             )
@@ -52,9 +52,10 @@ class TaskController extends Controller
     public function history(): Response
     {
         return Inertia::render('tasks/History', [
-            'tasks' => $this->tasksQuery()
+            'tasksByDate' => $this->tasksQuery(latestFirst: true)
                 ->whereDate('date', '<', today())
                 ->get()
+                ->groupBy(fn ($task) => $task->date->toDateString())
         ]);
     }
 
