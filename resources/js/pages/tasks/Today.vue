@@ -10,6 +10,7 @@ import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
 import TasksSection from '@/components/tasks/TasksSection.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
 import { BreadcrumbItem } from '@/types';
+import PageTitle from '@/components/tasks/PageTitle.vue';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
 const { tasks } = defineProps<{ tasks: Task[]; }>();
@@ -32,11 +33,23 @@ const title = computed(() =>
     <Head title="Today" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <TasksSection
+            v-if="tasks.length > 0"
             @edit-task="editTask"
             :tasks="tasks"
             :title="title"
             subtitle="Your scheduled tasks for today."
         />
+
+        <div
+            v-else
+            class="mx-auto my-10 w-full max-w-4xl space-y-6"
+        >
+            <PageTitle
+                title="No tasks for today"
+                subtitle="You're all caught up for now."
+            />
+        </div>
+
         <TaskFormDialog v-model:open="dialogOpen" :task="editingTask" />
         <CreateTaskButton @create="createTask" />
     </AppLayout>
