@@ -32,7 +32,7 @@ import type { RequestPayload } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import type { DateValue } from '@internationalized/date';
 import { parseDate } from '@internationalized/date';
-import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
+import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 import { CalendarIcon } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
@@ -186,6 +186,7 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
                             v-model="date"
                             :initial-focus="true"
                             layout="month-and-year"
+                            :minValue="today(getLocalTimeZone())"
                             @update:model-value="
                                 (value) => {
                                     if (value) {
