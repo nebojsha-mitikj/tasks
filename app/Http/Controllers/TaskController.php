@@ -22,6 +22,7 @@ class TaskController extends Controller
         $userId ??= auth()->id();
         return Task::query()
             ->where('user_id', $userId)
+            ->orderBy('date')
             ->orderByRaw(
                 "FIELD(status, '" . implode("','", TaskStatusEnum::ordered()) . "')"
             )
@@ -41,11 +42,10 @@ class TaskController extends Controller
     public function upcoming(): Response
     {
         return Inertia::render('tasks/Upcoming', [
-            'tasks' => $this->tasksQuery()
-                ->whereBetween('date', [
-                    today(),
-                    today()->addDays(7),
-                ])->get()
+            'tasksByDate' => $this->tasksQuery()
+                ->whereBetween('date', [today()->addDay(), today()->addDays(7)])
+                ->get()
+                ->groupBy(fn ($task) => $task->date->toDateString())
         ]);
     }
 
