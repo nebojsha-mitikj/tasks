@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Check, CircleDot } from 'lucide-vue-next';
 import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
+import { Button } from '@/components/ui/button';
 
 const props = defineProps<{ task: Task }>();
 const isUpdating = ref<boolean>(false);
@@ -78,21 +79,22 @@ const alertDescription = computed((): string => {
     <TooltipProvider v-if="props.task.status != TaskStatus.COMPLETED">
         <Tooltip>
             <TooltipTrigger as-child>
-                <button
+                <Button
                     :disabled="isUpdating"
                     @click="showAlert = true"
-                    class="cursor-pointer rounded p-1 transition
-                    hover:bg-muted text-muted-foreground hover:text-foreground"
+                    size="icon"
+                    variant="ghost"
+                    class="rounded-full cursor-pointer"
                 >
                     <CircleDot
                         v-if="props.task.status === TaskStatus.TO_DO"
-                        class="h-4 w-4"
+                        class="size-5 text-muted-foreground"
                     />
                     <Check
                         v-else-if="props.task.status === TaskStatus.IN_PROGRESS"
-                        class="h-4 w-4"
+                        class="size-5 text-muted-foreground"
                     />
-                </button>
+                </Button>
             </TooltipTrigger>
             <TooltipContent>
                 <p>{{ tooltipText }}</p>

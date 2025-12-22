@@ -11,6 +11,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 
 const props = defineProps<{ task: Task }>();
 const isDeleting = ref<boolean>(false);
@@ -41,12 +42,14 @@ const deleteTask = (): void => {
 
     <Tooltip>
         <TooltipTrigger as-child>
-            <button
+            <Button
                 @click="showAlert = true"
-                class="cursor-pointer rounded p-1 transition hover:bg-destructive/10"
+                size="icon"
+                variant="ghost"
+                class="rounded-full cursor-pointer"
             >
-                <Trash2 class="h-4 w-4 text-destructive" />
-            </button>
+                <Trash2 class="size-5 text-destructive" />
+            </Button>
         </TooltipTrigger>
         <TooltipContent>Delete task</TooltipContent>
     </Tooltip>
