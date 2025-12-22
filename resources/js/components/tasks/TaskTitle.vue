@@ -9,7 +9,7 @@ const props = defineProps<{
 
 <template>
     <p
-        class="text-sm font-medium"
+        class="font-medium"
         :class="{
             'text-muted-foreground line-through':
                 props.task.status === TaskStatus.COMPLETED,
