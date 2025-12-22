@@ -6,12 +6,7 @@ import { Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
+import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
 
 const props = defineProps<{ task: Task }>();
 const isDeleting = ref<boolean>(false);
@@ -39,18 +34,10 @@ const deleteTask = (): void => {
         v-model:open="showAlert"
         @submit="deleteTask"
     />
-
-    <Tooltip>
-        <TooltipTrigger as-child>
-            <Button
-                @click="showAlert = true"
-                size="icon"
-                variant="ghost"
-                class="rounded-full cursor-pointer"
-            >
-                <Trash2 class="size-5 text-destructive" />
-            </Button>
-        </TooltipTrigger>
-        <TooltipContent>Delete task</TooltipContent>
-    </Tooltip>
+    <TooltipButton
+        @click="showAlert = true"
+        :icon="Trash2"
+        tooltip="Delete task"
+        variant="destructive"
+    />
 </template>

@@ -5,15 +5,10 @@ import { router } from '@inertiajs/vue3';
 import { updateStatus } from '@/actions/App/Http/Controllers/TaskController';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { Check, CircleDot } from 'lucide-vue-next';
 import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
-import { Button } from '@/components/ui/button';
+import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
+import { Component } from 'vue';
 
 const props = defineProps<{ task: Task }>();
 const isUpdating = ref<boolean>(false);
@@ -45,6 +40,16 @@ const updateStatusRequest = (): void => {
     );
 };
 
+const icon = computed((): Component|null => {
+    if (props.task.status === TaskStatus.TO_DO) {
+        return CircleDot;
+    }
+    if (props.task.status === TaskStatus.IN_PROGRESS) {
+        return Check;
+    }
+    return null;
+});
+
 const tooltipText = computed((): string => {
     if (props.task.status === TaskStatus.TO_DO) {
         return 'Mark as in progress';
@@ -67,7 +72,6 @@ const alertDescription = computed((): string => {
 </script>
 
 <template>
-
     <ConfirmAlert
         :request-is-active="isUpdating"
         :description="alertDescription"
@@ -75,31 +79,11 @@ const alertDescription = computed((): string => {
         v-model:open="showAlert"
         @submit="updateStatusRequest"
     />
-
-    <TooltipProvider v-if="props.task.status != TaskStatus.COMPLETED">
-        <Tooltip>
-            <TooltipTrigger as-child>
-                <Button
-                    :disabled="isUpdating"
-                    @click="showAlert = true"
-                    size="icon"
-                    variant="ghost"
-                    class="rounded-full cursor-pointer"
-                >
-                    <CircleDot
-                        v-if="props.task.status === TaskStatus.TO_DO"
-                        class="size-5 text-muted-foreground"
-                    />
-                    <Check
-                        v-else-if="props.task.status === TaskStatus.IN_PROGRESS"
-                        class="size-5 text-muted-foreground"
-                    />
-                </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>{{ tooltipText }}</p>
-            </TooltipContent>
-        </Tooltip>
-    </TooltipProvider>
-
+    <TooltipButton
+        v-if="icon !== null"
+        :icon="icon"
+        :tooltip="tooltipText"
+        :disabled="isUpdating"
+        @click="showAlert = true"
+    />
 </template>
