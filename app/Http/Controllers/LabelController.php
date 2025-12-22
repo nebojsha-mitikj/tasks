@@ -13,6 +13,11 @@ use Inertia\Response;
 
 class LabelController extends Controller
 {
+    /**
+     * Inertia props:
+     *   labels: Collection<int, Label>
+     *   Shared globally via AppServiceProvider::boot()
+     */
     public function index(): Response
     {
         return Inertia::render('labels/Labels', []);
