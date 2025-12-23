@@ -34,12 +34,14 @@ const deleteLabel = (): void => {
 
 const handleAction = (action: 'edit' | 'delete' | 'view'): void => {
     if (action === 'edit') {
+
         return;
     }
     if (action === 'delete') {
         showAlert.value = true;
         return;
     }
+    router.visit('/labels/' + label.id);
 };
 </script>
 
