@@ -15,7 +15,7 @@ const { labels } = defineProps<{ labels: Label[] }>();
         >
             <LabelName :name="label.name"/>
 
-            <LabelActions />
+            <LabelActions :label="label" />
         </div>
     </div>
 </template>

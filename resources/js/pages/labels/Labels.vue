@@ -18,11 +18,8 @@ const { labels } = defineProps<{ labels: Label[] }>();
     <Head title="Labels" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="mx-auto my-10 w-full max-w-4xl space-y-6">
-
             <LabelHeader/>
-
             <LabelList :labels="labels"/>
-
         </div>
     </AppLayout>
 </template>
