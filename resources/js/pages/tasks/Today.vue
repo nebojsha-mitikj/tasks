@@ -9,7 +9,7 @@ import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
 import TasksSection from '@/components/tasks/TasksSection.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
 import { countCompleted } from '@/utils/taskCounts'
-import { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();

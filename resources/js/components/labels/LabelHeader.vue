@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Plus } from 'lucide-vue-next';
 import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
+
+const emit = defineEmits<{
+    (e: 'create'): void;
+}>();
 </script>
 
 <template>
@@ -14,6 +18,7 @@ import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
             </div>
         </div>
         <TooltipButton
+            @click="emit('create')"
             :icon="Plus"
             tooltip="Add label"
         />

@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
 import { ref } from 'vue';
-import { IconAction } from '@/types/ui/IconAction';
+import type { IconAction } from '@/types/ui/IconAction';
 import { ChevronRight, Pencil, Trash2 } from 'lucide-vue-next';
 import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
 import { router } from '@inertiajs/vue3';
 import { destroy } from '@/actions/App/Http/Controllers/LabelController';
 import { toast } from 'vue-sonner';
-import { Label } from '@/types/Label';
+import type { Label } from '@/types/labels/Label';
 
 const { label } = defineProps<{ label: Label }>();
+
+const emit = defineEmits<{
+    (e: 'edit', label: Label): void
+}>();
 
 const icons = ref<IconAction[]>([
     { action: 'edit', tooltip: 'Edit label', icon: Pencil },
@@ -34,7 +38,7 @@ const deleteLabel = (): void => {
 
 const handleAction = (action: 'edit' | 'delete' | 'view'): void => {
     if (action === 'edit') {
-
+        emit('edit', label)
         return;
     }
     if (action === 'delete') {

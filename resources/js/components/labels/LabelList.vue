@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import LabelActions from '@/components/labels/LabelActions.vue';
 import LabelName from '@/components/labels/LabelName.vue';
-import { Label } from '@/types/Label';
+import type { Label } from '@/types/labels/Label';
 
 const { labels } = defineProps<{ labels: Label[] }>();
+
+const emit = defineEmits<{
+    (e: 'edit', label: Label): void
+}>();
+
 </script>
 
 <template>
@@ -15,7 +20,7 @@ const { labels } = defineProps<{ labels: Label[] }>();
         >
             <LabelName :name="label.name"/>
 
-            <LabelActions :label="label" />
+            <LabelActions @edit="emit('edit', $event)" :label="label" />
         </div>
     </div>
 </template>

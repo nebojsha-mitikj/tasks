@@ -5,7 +5,11 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import LabelHeader from '@/components/labels/LabelHeader.vue';
 import LabelList from '@/components/labels/LabelList.vue';
-import { Label } from '@/types/Label';
+import { Label } from '@/types/labels/Label';
+import LabelFormDialog from '@/components/labels/LabelFormDialog.vue';
+import { useLabelDialog } from '@/composables/useLabelDialog';
+
+const { dialogOpen, editingLabel, editLabel, createLabel } = useLabelDialog();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Labels', href: getLabels().url },
@@ -18,8 +22,9 @@ const { labels } = defineProps<{ labels: Label[] }>();
     <Head title="Labels" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="mx-auto my-10 w-full max-w-4xl space-y-6">
-            <LabelHeader/>
-            <LabelList :labels="labels"/>
+            <LabelHeader @create="createLabel"/>
+            <LabelList :labels="labels" @edit="editLabel"/>
         </div>
+        <LabelFormDialog :label="editingLabel" v-model:open="dialogOpen" />
     </AppLayout>
 </template>
