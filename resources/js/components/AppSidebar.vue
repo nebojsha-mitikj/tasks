@@ -17,6 +17,7 @@ import { type NavSection, type AppPageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Calendar, Star, Repeat, History, Tag, Circle } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import { computed } from 'vue';
 
 type Label = {
     id: number;
@@ -25,7 +26,7 @@ type Label = {
 
 const page = usePage<AppPageProps<{ labels: Label[] }>>();
 
-const navSections: NavSection[] = [
+const navSections = computed<NavSection[]>(() => [
     {
         title: 'Tasks',
         items: [
@@ -78,9 +79,8 @@ const navSections: NavSection[] = [
                 icon: Tag,
             },
         ]
-    },
-
-];
+    }
+]);
 
 </script>
 
