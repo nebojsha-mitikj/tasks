@@ -5,3 +5,5 @@ export const formatDate = (date: string): string => {
         day: 'numeric',
     });
 }
+
+export const toDate = (iso: string) => iso.slice(0, 10);
