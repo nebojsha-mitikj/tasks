@@ -6,9 +6,8 @@ import type { Label } from '@/types/labels/Label';
 const { labels } = defineProps<{ labels: Label[] }>();
 
 const emit = defineEmits<{
-    (e: 'edit', label: Label): void
+    (e: 'edit', label: Label): void;
 }>();
-
 </script>
 
 <template>
@@ -18,7 +17,7 @@ const emit = defineEmits<{
             :key="label.id"
             class="group flex items-center justify-between rounded-xl px-6 py-2 hover:bg-muted/50"
         >
-            <LabelName :name="label.name"/>
+            <LabelName :name="label.name" />
 
             <LabelActions @edit="emit('edit', $event)" :label="label" />
         </div>

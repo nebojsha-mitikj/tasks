@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { store, update } from '@/actions/App/Http/Controllers/LabelController';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -8,15 +10,13 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { computed, ref, watch } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
 import type { AppPageProps } from '@/types';
-import type { RequestPayload } from '@inertiajs/core';
-import { toast } from 'vue-sonner';
-import { store, update } from '@/actions/App/Http/Controllers/LabelController';
-import type { Label } from '@/types/labels/Label';
 import type { CreateLabelPayload } from '@/types/labels/CreateLabelPayload';
+import type { Label } from '@/types/labels/Label';
+import type { RequestPayload } from '@inertiajs/core';
+import { router, usePage } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
+import { toast } from 'vue-sonner';
 
 const isSubmitting = ref<boolean>(false);
 const name = ref<string>('');
@@ -88,9 +88,7 @@ const submitRequest = (payload: RequestPayload & CreateLabelPayload): void => {
         >
             <DialogHeader>
                 <DialogTitle>
-                    <template v-if="label == null">
-                        Add a new label
-                    </template>
+                    <template v-if="label == null"> Add a new label </template>
                     <template v-else> Update label </template>
                 </DialogTitle>
                 <DialogDescription>

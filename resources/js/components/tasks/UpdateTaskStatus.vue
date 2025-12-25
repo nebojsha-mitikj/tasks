@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import type { Task } from '@/types/tasks/Task';
-import { TaskStatus } from '@/enums/TaskStatus';
-import { router } from '@inertiajs/vue3';
 import { updateStatus } from '@/actions/App/Http/Controllers/TaskController';
-import { computed, ref } from 'vue';
-import { toast } from 'vue-sonner';
-import { Check, CircleDot } from 'lucide-vue-next';
 import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
 import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
-import { Component } from 'vue';
+import { TaskStatus } from '@/enums/TaskStatus';
+import type { Task } from '@/types/tasks/Task';
+import { router } from '@inertiajs/vue3';
+import { Check, CircleDot } from 'lucide-vue-next';
+import { Component, computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{ task: Task }>();
 const isUpdating = ref<boolean>(false);
@@ -40,7 +39,7 @@ const updateStatusRequest = (): void => {
     );
 };
 
-const icon = computed((): Component|null => {
+const icon = computed((): Component | null => {
     if (props.task.status === TaskStatus.TO_DO) {
         return CircleDot;
     }

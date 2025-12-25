@@ -26,18 +26,22 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { TaskPriority } from '@/enums/TaskPriority';
 import { cn } from '@/lib/utils';
+import { AppPageProps } from '@/types';
 import type { CreateTaskPayload } from '@/types/tasks/CreateTaskPayload';
+import type { Task } from '@/types/tasks/Task';
 import { capitalizeFirstLetter } from '@/utils/string';
 import type { RequestPayload } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import type { DateValue } from '@internationalized/date';
-import { parseDate } from '@internationalized/date';
-import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
+import {
+    DateFormatter,
+    getLocalTimeZone,
+    parseDate,
+    today,
+} from '@internationalized/date';
 import { CalendarIcon } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
-import type { Task } from '@/types/tasks/Task';
-import { AppPageProps } from '@/types';
 
 const date = ref<DateValue | undefined>();
 const isSubmitting = ref<boolean>(false);

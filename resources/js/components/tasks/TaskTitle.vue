@@ -3,7 +3,7 @@ import { TaskStatus } from '@/enums/TaskStatus';
 import type { Task } from '@/types/tasks/Task';
 
 const props = defineProps<{
-    task: Task
+    task: Task;
 }>();
 </script>
 

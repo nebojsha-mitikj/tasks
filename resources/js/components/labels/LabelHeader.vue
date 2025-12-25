@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Plus } from 'lucide-vue-next';
 import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
+import { Plus } from 'lucide-vue-next';
 
 const emit = defineEmits<{
     (e: 'create'): void;

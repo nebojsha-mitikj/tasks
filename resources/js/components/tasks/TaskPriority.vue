@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { TaskStatus as TaskStatusEnum } from '@/enums/TaskStatus';
 import type { Task } from '@/types/tasks/Task';
-import {capitalizeFirstLetter} from '@/utils/string';
+import { capitalizeFirstLetter } from '@/utils/string';
 
 const props = defineProps<{
-    task: Task
+    task: Task;
 }>();
 </script>
 
@@ -15,8 +15,7 @@ const props = defineProps<{
     >
         Priority:
         <span class="font-bold">
-            {{capitalizeFirstLetter(task.priority) }}
+            {{ capitalizeFirstLetter(task.priority) }}
         </span>
     </p>
 </template>
-

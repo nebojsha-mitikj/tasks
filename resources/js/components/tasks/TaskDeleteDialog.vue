@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { destroy } from '@/actions/App/Http/Controllers/TaskController';
+import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
+import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
 import type { Task } from '@/types/tasks/Task';
 import { router } from '@inertiajs/vue3';
 import { Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
-import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
-import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
 
 const props = defineProps<{ task: Task }>();
 const isDeleting = ref<boolean>(false);

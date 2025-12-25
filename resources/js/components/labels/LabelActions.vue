@@ -1,24 +1,29 @@
 <script setup lang="ts">
-import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
-import { ref } from 'vue';
-import type { IconAction } from '@/types/ui/IconAction';
-import { ChevronRight, Pencil, Trash2 } from 'lucide-vue-next';
-import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
-import { router } from '@inertiajs/vue3';
 import { destroy } from '@/actions/App/Http/Controllers/LabelController';
-import { toast } from 'vue-sonner';
+import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
+import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
 import type { Label } from '@/types/labels/Label';
+import type { IconAction } from '@/types/ui/IconAction';
+import { router } from '@inertiajs/vue3';
+import { ChevronRight, Pencil, Trash2 } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const { label } = defineProps<{ label: Label }>();
 
 const emit = defineEmits<{
-    (e: 'edit', label: Label): void
+    (e: 'edit', label: Label): void;
 }>();
 
 const icons = ref<IconAction[]>([
     { action: 'edit', tooltip: 'Edit label', icon: Pencil },
-    { action: 'delete', tooltip: 'Delete label', icon: Trash2, variant: 'destructive' },
-    { action: 'view', tooltip: 'View tasks', icon: ChevronRight }
+    {
+        action: 'delete',
+        tooltip: 'Delete label',
+        icon: Trash2,
+        variant: 'destructive',
+    },
+    { action: 'view', tooltip: 'View tasks', icon: ChevronRight },
 ]);
 const isDeleting = ref<boolean>(false);
 const showAlert = ref<boolean>(false);
@@ -38,7 +43,7 @@ const deleteLabel = (): void => {
 
 const handleAction = (action: 'edit' | 'delete' | 'view'): void => {
     if (action === 'edit') {
-        emit('edit', label)
+        emit('edit', label);
         return;
     }
     if (action === 'delete') {

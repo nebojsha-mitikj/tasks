@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
 import {
     AlertDialog,
     AlertDialogCancel,
@@ -9,24 +8,29 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { computed } from 'vue';
 
 const emit = defineEmits<{
-    (e: 'submit'): void,
-    (e: 'update:open', value: boolean): void
+    (e: 'submit'): void;
+    (e: 'update:open', value: boolean): void;
 }>();
 
-const props = withDefaults(defineProps<{
-    open: boolean,
-    title?: string,
-    description?: string,
-    requestIsActive: boolean,
-    confirmLabel?: string
-}>(), {
-    title: 'Are you absolutely sure?',
-    description: 'Please confirm that you want to continue with this action.',
-    confirmLabel: 'Confirm'
-});
+const props = withDefaults(
+    defineProps<{
+        open: boolean;
+        title?: string;
+        description?: string;
+        requestIsActive: boolean;
+        confirmLabel?: string;
+    }>(),
+    {
+        title: 'Are you absolutely sure?',
+        description:
+            'Please confirm that you want to continue with this action.',
+        confirmLabel: 'Confirm',
+    },
+);
 
 const openProxy = computed({
     get: () => props.open,
@@ -58,7 +62,11 @@ const submit = (): void => {
                     class="cursor-pointer"
                     @click="submit"
                 >
-                    {{ props.requestIsActive ? 'Processing...' : props.confirmLabel }}
+                    {{
+                        props.requestIsActive
+                            ? 'Processing...'
+                            : props.confirmLabel
+                    }}
                 </Button>
             </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PageTitle from '@/components/tasks/PageTitle.vue';
-const { title, subtitle = 'You\'re all caught up for now.'} = defineProps<{
+const { title, subtitle = "You're all caught up for now." } = defineProps<{
     title: string;
     subtitle?: string;
 }>();

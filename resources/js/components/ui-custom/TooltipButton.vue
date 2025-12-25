@@ -1,21 +1,25 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button';
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
 import type { Component } from 'vue';
 
-const { icon, tooltip, variant = 'default' } = defineProps<{
-    icon: Component,
-    tooltip?: string
-    variant?: 'default' | 'destructive',
-    disabled?: boolean
+const {
+    icon,
+    tooltip,
+    variant = 'default',
+} = defineProps<{
+    icon: Component;
+    tooltip?: string;
+    variant?: 'default' | 'destructive';
+    disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
-    (e: 'click'): void
+    (e: 'click'): void;
 }>();
 </script>
 
@@ -34,7 +38,7 @@ const emit = defineEmits<{
                     class="size-5"
                     :class="{
                         'text-muted-foreground': variant === 'default',
-                        'text-destructive': variant === 'destructive'
+                        'text-destructive': variant === 'destructive',
                     }"
                 />
             </Button>
