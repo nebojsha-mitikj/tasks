@@ -10,7 +10,7 @@ const emit = defineEmits<{
 const props = defineProps<{
     tasks: Task[];
     title: string;
-    subtitle: string;
+    subtitle?: string;
 }>();
 </script>
 
