@@ -6,7 +6,16 @@ import { ChevronDown } from "lucide-vue-next"
 import { SelectIcon, SelectTrigger, useForwardProps } from "reka-ui"
 import { cn } from "@/lib/utils"
 
-const props = defineProps<SelectTriggerProps & { class?: HTMLAttributes["class"] }>()
+const props = withDefaults(
+    defineProps<SelectTriggerProps & {
+        class?: HTMLAttributes["class"]
+        showChevron?: boolean
+    }>(),
+    {
+        showChevron: true,
+    }
+)
+
 
 const delegatedProps = reactiveOmit(props, "class")
 
@@ -22,7 +31,7 @@ const forwardedProps = useForwardProps(delegatedProps)
     )"
   >
     <slot />
-    <SelectIcon as-child>
+    <SelectIcon v-if="props.showChevron" as-child>
       <ChevronDown class="w-4 h-4 opacity-50 shrink-0" />
     </SelectIcon>
   </SelectTrigger>
