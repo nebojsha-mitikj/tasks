@@ -1,4 +1,4 @@
-import type { TaskPriority } from '@/enums/TaskPriority'
+import type { TaskPriority } from '@/enums/TaskPriority';
 
 export interface CreateTaskPayload {
     title: string;

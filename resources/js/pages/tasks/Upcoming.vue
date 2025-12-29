@@ -41,7 +41,11 @@ const breadcrumbs: BreadcrumbItem[] = [
             :subtitle="'Your scheduled tasks for ' + date + '.'"
             :labels="labels"
         />
-        <TaskFormDialog v-model:open="dialogOpen" :task="editingTask" />
+        <TaskFormDialog
+            v-model:open="dialogOpen"
+            :task="editingTask"
+            :labels="labels"
+        />
         <CreateTaskButton @create="createTask" />
     </AppLayout>
 </template>
