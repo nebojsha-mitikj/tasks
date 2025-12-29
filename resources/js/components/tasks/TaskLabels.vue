@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import type { Task } from '@/types/tasks/Task';
-
-const { task } = defineProps<{
-    task: Task;
-}>();
+const { task } = defineProps<{ task: Task }>();
 </script>
 
 <template>
