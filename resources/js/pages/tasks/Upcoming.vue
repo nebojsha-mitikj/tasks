@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import { history } from '@/routes/tasks';
-import { Head } from '@inertiajs/vue3';
-import type { Task } from '@/types/tasks/Task';
-import { BreadcrumbItem } from '@/types';
+import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
+import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
 import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
 import TasksSection from '@/components/tasks/TasksSection.vue';
-import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
-import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { history } from '@/routes/tasks';
+import { BreadcrumbItem } from '@/types';
+import { LabelWithTasks } from '@/types/labels/Label';
+import type { Task } from '@/types/tasks/Task';
 import { formatDate } from '@/utils/date';
+import { Head } from '@inertiajs/vue3';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
 
 const { tasksByDate } = defineProps<{
     tasksByDate: Record<string, Task[]>;
+    labels: LabelWithTasks[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -37,6 +39,7 @@ const breadcrumbs: BreadcrumbItem[] = [
             :tasks="tasks"
             :title="formatDate(date)"
             :subtitle="'Your scheduled tasks for ' + date + '.'"
+            :labels="labels"
         />
         <TaskFormDialog v-model:open="dialogOpen" :task="editingTask" />
         <CreateTaskButton @create="createTask" />

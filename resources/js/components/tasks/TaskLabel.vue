@@ -1,38 +1,37 @@
 <script setup lang="ts">
-import TooltipButton from '@/components/ui-custom/TooltipButton.vue'
-import type { AcceptableValue } from 'reka-ui'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger } from '@/components/ui/select'
-import { Tag } from 'lucide-vue-next'
-import type { Task } from '@/types/tasks/Task'
-import type { Label } from '@/types/labels/Label'
-import { ref, watch } from 'vue'
+import { updateLabels } from '@/actions/App/Http/Controllers/TaskController';
+import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+} from '@/components/ui/select';
+import type { Label } from '@/types/labels/Label';
+import type { Task } from '@/types/tasks/Task';
+import { router } from '@inertiajs/vue3';
+import { Tag } from 'lucide-vue-next';
+import { AcceptableValue } from 'reka-ui';
+import { ref } from 'vue';
 
 const props = defineProps<{ task: Task; labels: Label[] }>();
 
-const emit = defineEmits<{
-    (e: 'update:labels', labelIds: number[]): void
-}>()
-
-const selectedLabelIds = ref<number[]>([]);
-
-const setFromTask = () => {
-    selectedLabelIds.value = (props.task.labels ?? []).map(l => l.id)
-};
-
-watch(() => props.task.id, setFromTask, { immediate: true })
-
-const normalizeToNumberArray = (val: AcceptableValue): number[] => {
-    if (!Array.isArray(val)) return [];
-    return val
-        .map(v => Number(v))
-        .filter(n => Number.isFinite(n));
-}
+const selectedLabelIds = ref<number[]>(
+    (props.task.labels ?? []).map((l) => l.id),
+);
 
 const onLabelsChange = (val: AcceptableValue): void => {
-    const ids = normalizeToNumberArray(val);
-    selectedLabelIds.value = ids;
-    emit('update:labels', ids);
-}
+    selectedLabelIds.value = val as number[];
+    router.put(
+        updateLabels(props.task.id),
+        { label_ids: selectedLabelIds.value },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+};
 </script>
 
 <template>
@@ -41,7 +40,10 @@ const onLabelsChange = (val: AcceptableValue): void => {
         :model-value="selectedLabelIds"
         multiple
     >
-        <SelectTrigger :show-chevron="false" as-child>
+        <SelectTrigger
+            class="p-0 m-0 border-none dark:bg-background"
+            :show-chevron="false"
+        >
             <TooltipButton :icon="Tag" tooltip="Select labels" />
         </SelectTrigger>
         <SelectContent>

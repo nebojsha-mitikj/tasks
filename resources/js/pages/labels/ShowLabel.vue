@@ -12,7 +12,10 @@ import { useTaskDialog } from '@/composables/useTaskDialog';
 import { formatDate, toDate } from '@/utils/date';
 const { dialogOpen, editingTask, editTask } = useTaskDialog();
 
-const { label } = defineProps<{ label: LabelWithTasks }>();
+const { label } = defineProps<{
+    label: LabelWithTasks;
+    labels: LabelWithTasks[];
+}>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Labels', href: '/labels' },
@@ -51,6 +54,7 @@ const subtitle = computed(() =>
                     v-for="(tasks, date) in tasksByDate"
                     :key="date"
                     :tasks="tasks"
+                    :labels="labels"
                     :title="formatDate(date)"
                     @editTask="editTask"
                 />

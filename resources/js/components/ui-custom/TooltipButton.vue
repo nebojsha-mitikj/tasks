@@ -7,45 +7,50 @@ import {
 } from '@/components/ui/tooltip';
 import type { Component } from 'vue';
 
-const {
-    icon,
-    tooltip,
-    variant = 'default',
-} = defineProps<{
-    icon: Component;
-    tooltip?: string;
-    variant?: 'default' | 'destructive';
-    disabled?: boolean;
-}>();
-
-const emit = defineEmits<{
-    (e: 'click'): void;
-}>();
+const props = withDefaults(
+    defineProps<{
+        icon: Component;
+        tooltip?: string;
+        variant?: 'default' | 'destructive';
+        disabled?: boolean;
+    }>(),
+    {
+        variant: 'default',
+        disabled: false,
+    },
+);
 </script>
 
 <template>
     <Tooltip>
         <TooltipTrigger as-child>
             <Button
-                :disabled="disabled"
+                v-bind="$attrs"
+                :disabled="props.disabled"
                 size="icon"
                 variant="ghost"
                 class="cursor-pointer rounded-full"
-                @click="emit('click')"
             >
                 <component
-                    :is="icon"
+                    :is="props.icon"
                     class="size-5"
-                    :class="{
-                        'text-muted-foreground': variant === 'default',
-                        'text-destructive': variant === 'destructive',
-                    }"
+                    :class="
+                        props.variant === 'destructive'
+                            ? 'text-destructive'
+                            : 'text-muted-foreground'
+                    "
                 />
             </Button>
         </TooltipTrigger>
 
-        <TooltipContent v-if="tooltip">
-            {{ tooltip }}
+        <TooltipContent v-if="props.tooltip">
+            {{ props.tooltip }}
         </TooltipContent>
     </Tooltip>
 </template>
+
+<style>
+.tooltip-trigger svg {
+    display: none;
+}
+</style>

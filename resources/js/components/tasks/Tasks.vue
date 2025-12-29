@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import TaskActions from '@/components/tasks/TaskActions.vue';
 import TaskDescription from '@/components/tasks/TaskDescription.vue';
+import TaskLabels from '@/components/tasks/TaskLabels.vue';
 import TaskPriority from '@/components/tasks/TaskPriority.vue';
 import TaskStatus from '@/components/tasks/TaskStatus.vue';
 import TaskTitle from '@/components/tasks/TaskTitle.vue';
 import { usePageMatch } from '@/composables/usePageMatch';
+import type { Label } from '@/types/labels/Label';
 import type { Task } from '@/types/tasks/Task';
 
 const props = defineProps<{
     tasks: Task[];
+    labels: Label[];
 }>();
 
 const emit = defineEmits<{
@@ -35,12 +38,14 @@ const { isMatch: isHistoryMatch } = usePageMatch('tasks/History');
                     <template v-if="!isHistoryMatch">
                         <TaskStatus v-if="isTodayMatch" :task="task" />
                         <TaskPriority :task="task" />
+                        <TaskLabels :task="task" />
                     </template>
                 </div>
 
                 <TaskActions
                     v-if="!isHistoryMatch"
                     :task="task"
+                    :labels="labels"
                     @edit="emit('edit', $event)"
                     class="flex items-center gap-2"
                 />

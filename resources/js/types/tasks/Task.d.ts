@@ -1,5 +1,6 @@
 import type { TaskStatus } from '@/enums/TaskStatus';
 import type { TaskPriority } from '@/enums/TaskPriority';
+import { Label } from '@/types/labels/Label';
 
 export interface Task {
     id: number;
@@ -10,6 +11,7 @@ export interface Task {
     date: string;
     status: TaskStatus;
     priority: TaskPriority;
+    labels: Label[];
     created_at: string;
     updated_at: string;
 }

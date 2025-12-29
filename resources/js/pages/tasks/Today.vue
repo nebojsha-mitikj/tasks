@@ -11,9 +11,13 @@ import { useTaskDialog } from '@/composables/useTaskDialog';
 import { countCompleted } from '@/utils/taskCounts'
 import type { BreadcrumbItem } from '@/types';
 import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
+import type { Label } from '@/types/labels/Label';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
-const { tasks } = defineProps<{ tasks: Task[] }>();
+const { tasks } = defineProps<{
+    tasks: Task[];
+    labels: Label[];
+}>();
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Today', href: today().url }];
 
 const title = computed(() =>
@@ -30,6 +34,7 @@ const title = computed(() =>
             v-if="tasks.length > 0"
             @edit-task="editTask"
             :tasks="tasks"
+            :labels="labels"
             :title="title"
             subtitle="Your scheduled tasks for today."
         />

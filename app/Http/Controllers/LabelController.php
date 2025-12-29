@@ -26,7 +26,7 @@ class LabelController extends Controller
     public function show(Label $label): Response
     {
         $label->load([
-            'tasks' => fn ($query) => $query->whereDate('date', '>=', today())->orderBy('date')
+            'tasks' => fn ($query) => $query->whereDate('date', '>=', today())->orderBy('date')->with('labels')
         ]);
         return Inertia::render('labels/ShowLabel', [
             'label' => $label,

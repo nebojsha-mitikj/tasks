@@ -8,6 +8,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/upcoming', [TaskController::class, 'upcoming'])->name('tasks.upcoming');
     Route::get('/history', [TaskController::class, 'history'])->name('tasks.history');
     Route::put('/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
+    Route::put('/{task}/labels', [TaskController::class, 'updateLabels'])->name('tasks.updateLabels');
 
     Route::resource('tasks', TaskController::class)->only(['destroy', 'update', 'store'])
         ->middlewareFor('update', 'can:update,task')

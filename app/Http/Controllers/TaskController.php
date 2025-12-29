@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\TaskStatusEnum;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateStatusRequest;
+use App\Http\Requests\UpdateTaskLabelsRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +22,7 @@ class TaskController extends Controller
     {
         $userId ??= auth()->id();
         return Task::query()
+            ->with('labels')
             ->where('user_id', $userId)
             ->orderBy('date', $latestFirst ? 'DESC' : 'ASC')
             ->orderByRaw(
@@ -75,6 +77,12 @@ class TaskController extends Controller
     {
         $task->update($request->validated());
         return back()->with('success', 'Task status updated successfully.');
+    }
+
+    public function updateLabels(UpdateTaskLabelsRequest $request, Task $task): RedirectResponse
+    {
+        $task->labels()->sync($request->label_ids);
+        return back()->with('success', 'Task labels updated successfully.');
     }
 
     public function store(StoreTaskRequest $request): RedirectResponse
