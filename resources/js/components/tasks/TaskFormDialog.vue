@@ -19,6 +19,7 @@ import {
 import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
     SelectTrigger,
     SelectValue,
@@ -27,6 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { TaskPriority } from '@/enums/TaskPriority';
 import { cn } from '@/lib/utils';
 import { AppPageProps } from '@/types';
+import type { Label } from '@/types/labels/Label';
 import type { CreateTaskPayload } from '@/types/tasks/CreateTaskPayload';
 import type { Task } from '@/types/tasks/Task';
 import { capitalizeFirstLetter } from '@/utils/string';
@@ -40,8 +42,14 @@ import {
     today,
 } from '@internationalized/date';
 import { CalendarIcon } from 'lucide-vue-next';
+import { AcceptableValue } from 'reka-ui';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
+
+const props = defineProps<{
+    task: Task | null;
+    labels: Label[];
+}>();
 
 const date = ref<DateValue | undefined>();
 const isSubmitting = ref<boolean>(false);
@@ -50,12 +58,11 @@ const description = ref<string>('');
 const priority = ref<TaskPriority | ''>('');
 const datePopover = ref<boolean>(false);
 const page = usePage<AppPageProps>();
+const selectedLabelIds = ref<number[]>(
+    (props.task?.labels ?? []).map((l) => l.id),
+);
 
 const df = new DateFormatter('en-US', { dateStyle: 'long' });
-
-const props = defineProps<{
-    task: Task | null;
-}>();
 
 const open = defineModel<boolean>('open', { default: false });
 
@@ -71,6 +78,7 @@ const resetForm = () => {
     description.value = '';
     date.value = undefined;
     priority.value = '';
+    selectedLabelIds.value = (props.task?.labels ?? []).map((l) => l.id);
 };
 
 watch(
@@ -85,6 +93,7 @@ watch(
         priority.value = t.priority;
         const dateOnly = t.date.includes('T') ? t.date.split('T')[0] : t.date;
         date.value = parseDate(dateOnly);
+        selectedLabelIds.value = (props.task?.labels ?? []).map((l) => l.id);
     },
     { immediate: true },
 );
@@ -102,7 +111,12 @@ const submit = (): void => {
         description: description.value,
         date: date.value.toString(),
         priority: priority.value,
+        label_ids: selectedLabelIds.value,
     });
+};
+
+const onLabelsChange = (val: AcceptableValue): void => {
+    selectedLabelIds.value = val as number[];
 };
 
 const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
@@ -217,6 +231,27 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
                         >
                             {{ capitalizeFirstLetter(availablePriority) }}
                         </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select
+                    multiple
+                    :model-value="selectedLabelIds"
+                    @update:model-value="onLabelsChange"
+                >
+                    <SelectTrigger class="w-full max-w-[280px]">
+                        <SelectValue placeholder="Select labels" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem
+                                v-for="label in labels"
+                                :key="label.id"
+                                :value="label.id"
+                            >
+                                {{ label.name }}
+                            </SelectItem>
+                        </SelectGroup>
                     </SelectContent>
                 </Select>
             </div>

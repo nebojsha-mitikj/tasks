@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Enums\TaskPriorityEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 /**
@@ -13,6 +14,7 @@ use Illuminate\Validation\Rules\Enum;
  * @property string|null $description
  * @property string $date
  * @property TaskPriorityEnum $priority
+ * @property array $label_ids
  */
 class UpdateTaskRequest extends FormRequest
 {
@@ -22,7 +24,13 @@ class UpdateTaskRequest extends FormRequest
             'title' => 'required|string',
             'description' => 'nullable|string',
             'date' => 'required|date|after_or_equal:today',
-            'priority' => ['required', new Enum(TaskPriorityEnum::class)]
+            'priority' => ['required', new Enum(TaskPriorityEnum::class)],
+            'label_ids' => ['present', 'array'],
+            'label_ids.*' => [
+                'integer',
+                Rule::exists('labels', 'id')
+                    ->where('user_id', $this->user()->id),
+            ]
         ];
     }
 }

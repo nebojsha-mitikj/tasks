@@ -5,4 +5,5 @@ export interface CreateTaskPayload {
     description: string | null;
     date: string;
     priority: TaskPriority;
+    label_ids: number[];
 }

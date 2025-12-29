@@ -13,12 +13,19 @@ import type { Task } from '@/types/tasks/Task';
 import { router } from '@inertiajs/vue3';
 import { Tag } from 'lucide-vue-next';
 import { AcceptableValue } from 'reka-ui';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{ task: Task; labels: Label[] }>();
 
 const selectedLabelIds = ref<number[]>(
     (props.task.labels ?? []).map((l) => l.id),
+);
+
+watch(
+    () => props.task.labels,
+    (labels) => {
+        selectedLabelIds.value = (labels ?? []).map((l) => l.id);
+    },
 );
 
 const onLabelsChange = (val: AcceptableValue): void => {
@@ -41,7 +48,7 @@ const onLabelsChange = (val: AcceptableValue): void => {
         multiple
     >
         <SelectTrigger
-            class="p-0 m-0 border-none dark:bg-background"
+            class="m-0 border-none p-0 dark:bg-background"
             :show-chevron="false"
         >
             <TooltipButton :icon="Tag" tooltip="Select labels" />

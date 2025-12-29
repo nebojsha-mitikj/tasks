@@ -39,7 +39,11 @@ const title = computed(() =>
             subtitle="Your scheduled tasks for today."
         />
         <EmptyTasksMessage v-else title="No tasks for today" />
-        <TaskFormDialog v-model:open="dialogOpen" :task="editingTask" />
+        <TaskFormDialog
+            :labels="labels"
+            v-model:open="dialogOpen"
+            :task="editingTask"
+        />
         <CreateTaskButton @create="createTask" />
     </AppLayout>
 </template>

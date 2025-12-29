@@ -69,7 +69,11 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Task $task): RedirectResponse
     {
-        $task->update($request->validated());
+        $data = $request->validated();
+        $labelIds = $data['label_ids'] ?? [];
+        unset($data['label_ids']);
+        $task->update($data);
+        $task->labels()->sync($labelIds);
         return back()->with('success', 'Task updated successfully.');
     }
 
@@ -87,7 +91,11 @@ class TaskController extends Controller
 
     public function store(StoreTaskRequest $request): RedirectResponse
     {
-        $request->user()->tasks()->create($request->validated());
+        $data = $request->validated();
+        $labelIds = $data['label_ids'] ?? [];
+        unset($data['label_ids']);
+        $task = $request->user()->tasks()->create($data);
+        $task->labels()->sync($labelIds);
         return back()->with('success', 'Task created successfully.');
     }
 }
