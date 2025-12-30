@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property-read User $user
  * @property-read Collection<int, RecurringTaskTemplatePeriod> $periods
  * @property-read Collection<int, Task> $tasks
+ * @property-read Collection<int, Label> $labels
  *
  * @method static Builder|RecurringTaskTemplate query()
  */
@@ -61,5 +63,11 @@ class RecurringTaskTemplate extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function labels(): BelongsToMany
+    {
+        return $this->belongsToMany(Label::class, 'label_recurring_task_template')
+            ->withTimestamps();
     }
 }

@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * Relationships
  * @property-read User $user
  * @property-read Collection<int, Task> $tasks
+ * @property-read Collection<int, RecurringTaskTemplate> $recurringTaskTemplates
  *
  * @method static Builder|Label query()
  */
@@ -42,6 +43,12 @@ class Label extends Model
     public function tasks(): BelongsToMany
     {
         return $this->belongsToMany(Task::class, 'label_task')
+            ->withTimestamps();
+    }
+
+    public function recurringTaskTemplates(): BelongsToMany
+    {
+        return $this->belongsToMany(RecurringTaskTemplate::class, 'label_recurring_task_template')
             ->withTimestamps();
     }
 }
