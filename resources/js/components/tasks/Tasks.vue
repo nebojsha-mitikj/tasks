@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TaskListCard from '@/components/list/TaskListCard.vue';
 import TaskActions from '@/components/tasks/TaskActions.vue';
 import TaskDescription from '@/components/tasks/TaskDescription.vue';
 import TaskLabels from '@/components/tasks/TaskLabels.vue';
@@ -9,7 +10,7 @@ import { usePageMatch } from '@/composables/usePageMatch';
 import type { Label } from '@/types/labels/Label';
 import type { Task } from '@/types/tasks/Task';
 
-const props = defineProps<{
+const { tasks, labels } = defineProps<{
     tasks: Task[];
     labels: Label[];
 }>();
@@ -23,37 +24,27 @@ const { isMatch: isHistoryMatch } = usePageMatch('tasks/History');
 </script>
 
 <template>
-    <div class="rounded-lg border bg-card p-6 shadow-sm">
-        <div v-if="props.tasks.length" class="space-y-4">
-            <div
-                v-for="task in props.tasks"
-                :key="task.id"
-                class="flex items-start justify-between gap-4 border-b pb-3 last:border-0 last:pb-0"
-            >
-                <div class="flex-1 space-y-1">
-                    <TaskTitle :task="task" />
+    <TaskListCard :items="tasks" empty-text="No tasks for today.">
+        <template #row="{ item: task }">
+            <div class="flex-1 space-y-1">
+                <TaskTitle :task="task" />
 
-                    <TaskDescription :task="task" />
+                <TaskDescription :task="task" />
 
-                    <template v-if="!isHistoryMatch">
-                        <TaskStatus v-if="isTodayMatch" :task="task" />
-                        <TaskPriority :task="task" />
-                        <TaskLabels :task="task" />
-                    </template>
-                </div>
-
-                <TaskActions
-                    v-if="!isHistoryMatch"
-                    :task="task"
-                    :labels="labels"
-                    @edit="emit('edit', $event)"
-                    class="flex items-center gap-2"
-                />
+                <template v-if="!isHistoryMatch">
+                    <TaskStatus v-if="isTodayMatch" :task="task" />
+                    <TaskPriority :task="task" />
+                    <TaskLabels :task="task" />
+                </template>
             </div>
-        </div>
 
-        <div v-else class="text-sm text-muted-foreground">
-            No tasks for today.
-        </div>
-    </div>
+            <TaskActions
+                v-if="!isHistoryMatch"
+                :task="task"
+                :labels="labels"
+                @edit="emit('edit', $event)"
+                class="flex items-center gap-2"
+            />
+        </template>
+    </TaskListCard>
 </template>
