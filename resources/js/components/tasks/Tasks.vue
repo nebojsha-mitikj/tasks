@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import LabelBadgeList from '@/components/labels/LabelBadgeList.vue';
 import TaskListCard from '@/components/list/TaskListCard.vue';
+import DescriptionText from '@/components/tasks/DescriptionText.vue';
+import PriorityText from '@/components/tasks/PriorityText.vue';
 import TaskActions from '@/components/tasks/TaskActions.vue';
-import TaskDescription from '@/components/tasks/TaskDescription.vue';
-import TaskLabels from '@/components/tasks/TaskLabels.vue';
-import TaskPriority from '@/components/tasks/TaskPriority.vue';
 import TaskStatus from '@/components/tasks/TaskStatus.vue';
 import TaskTitle from '@/components/tasks/TaskTitle.vue';
 import { usePageMatch } from '@/composables/usePageMatch';
+import { TaskStatus as TaskStatusEnum } from '@/enums/TaskStatus';
 import type { Label } from '@/types/labels/Label';
 import type { Task } from '@/types/tasks/Task';
 
@@ -29,12 +30,15 @@ const { isMatch: isHistoryMatch } = usePageMatch('tasks/History');
             <div class="flex-1 space-y-1">
                 <TaskTitle :task="task" />
 
-                <TaskDescription :task="task" />
+                <DescriptionText :text="task.description" />
 
                 <template v-if="!isHistoryMatch">
                     <TaskStatus v-if="isTodayMatch" :task="task" />
-                    <TaskPriority :task="task" />
-                    <TaskLabels :task="task" />
+                    <PriorityText
+                        v-if="task.status !== TaskStatusEnum.COMPLETED"
+                        :priority="task.priority"
+                    />
+                    <LabelBadgeList :labels="task.labels" />
                 </template>
             </div>
 
@@ -43,7 +47,6 @@ const { isMatch: isHistoryMatch } = usePageMatch('tasks/History');
                 :task="task"
                 :labels="labels"
                 @edit="emit('edit', $event)"
-                class="flex items-center gap-2"
             />
         </template>
     </TaskListCard>
