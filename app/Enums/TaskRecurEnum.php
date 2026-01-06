@@ -12,4 +12,5 @@ enum TaskRecurEnum: string
     case DAILY = 'daily';
     case WEEKDAYS = 'weekdays';
     case WEEKENDS = 'weekends';
+    case WEEKLY = 'weekly';
 }
