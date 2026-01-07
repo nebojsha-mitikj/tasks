@@ -38,8 +38,8 @@ const { isMatch: isHistoryMatch } = usePageMatch('tasks/History');
                         v-if="task.status !== TaskStatusEnum.COMPLETED"
                         :priority="task.priority"
                     />
-                    <LabelBadgeList :labels="task.labels" />
                 </template>
+                <LabelBadgeList :labels="task.labels" />
             </div>
 
             <TaskActions
