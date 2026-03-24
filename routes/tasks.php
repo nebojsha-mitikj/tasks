@@ -3,12 +3,22 @@
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => 'auth'], static function () {
     Route::get('/today', [TaskController::class, 'today'])->name('tasks.today');
     Route::get('/upcoming', [TaskController::class, 'upcoming'])->name('tasks.upcoming');
     Route::get('/history', [TaskController::class, 'history'])->name('tasks.history');
-    Route::put('/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
-    Route::put('/{task}/labels', [TaskController::class, 'updateLabels'])->name('tasks.updateLabels');
+
+    Route::put('/tasks/{task}/status', [TaskController::class, 'updateStatus'])
+        ->name('tasks.status.update')
+        ->middleware('can:update,task');
+
+    Route::put('/tasks/{task}/labels', [TaskController::class, 'updateLabels'])
+        ->name('tasks.labels.update')
+        ->middleware('can:update,task');
+
+    Route::post('/tasks/{template}/materialize', [TaskController::class, 'materialize'])
+        ->name('tasks.materialize')
+        ->middleware('can:materialize,template');
 
     Route::resource('tasks', TaskController::class)->only(['destroy', 'update', 'store'])
         ->middlewareFor('update', 'can:update,task')

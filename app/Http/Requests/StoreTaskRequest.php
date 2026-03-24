@@ -13,8 +13,9 @@ use Illuminate\Validation\Rules\Enum;
  * @property string $title
  * @property string|null $description
  * @property string $date
- * @property TaskPriorityEnum $priority
- * @property array $label_ids
+ * @property string $priority
+ * @property array<int> $label_ids
+ * @property int|null $recurring_task_template_id
  */
 class StoreTaskRequest extends FormRequest
 {
@@ -30,7 +31,13 @@ class StoreTaskRequest extends FormRequest
                 'integer',
                 Rule::exists('labels', 'id')
                     ->where('user_id', $this->user()->id),
-            ]
+            ],
+            'recurring_task_template_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('recurring_task_templates', 'id')
+                    ->where('user_id', $this->user()->id),
+            ],
         ];
     }
 }

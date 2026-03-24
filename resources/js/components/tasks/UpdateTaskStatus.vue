@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { updateStatus } from '@/actions/App/Http/Controllers/TaskController';
+import { materialize, updateStatus } from '@/actions/App/Http/Controllers/TaskController';
 import ConfirmAlert from '@/components/ui-custom/ConfirmAlert.vue';
 import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
 import { TaskStatus } from '@/enums/TaskStatus';
 import type { Task } from '@/types/tasks/Task';
 import { router } from '@inertiajs/vue3';
 import { Check, CircleDot } from 'lucide-vue-next';
-import { Component, computed, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 
 const props = defineProps<{ task: Task }>();
@@ -22,66 +22,62 @@ const updateStatusRequest = (): void => {
         status = TaskStatus.COMPLETED;
     }
     isUpdating.value = true;
-    router.put(
-        updateStatus(props.task.id),
-        {
-            status: status,
+
+    const options = {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.success('Task status updated successfully.');
         },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Task status updated successfully.');
-            },
-            onFinish: () => {
-                isUpdating.value = false;
-            },
+        onFinish: () => {
+            isUpdating.value = false;
         },
-    );
+    };
+
+    if (props.task.is_virtual && props.task.recurring_task_template_id) {
+        router.post(
+            materialize(props.task.recurring_task_template_id),
+            { date: props.task.date, status },
+            options,
+        );
+    } else {
+        router.put(updateStatus(props.task.id), { status }, options);
+    }
 };
 
-const icon = computed((): Component | null => {
+const statusConfig = computed(() => {
     if (props.task.status === TaskStatus.TO_DO) {
-        return CircleDot;
+        return {
+            icon: CircleDot,
+            tooltip: 'Mark as in progress',
+            description: 'This will mark the task as in progress.',
+        };
     }
+
     if (props.task.status === TaskStatus.IN_PROGRESS) {
-        return Check;
+        return {
+            icon: Check,
+            tooltip: 'Mark as complete',
+            description: 'This will mark the task as completed.',
+        };
     }
+
     return null;
-});
-
-const tooltipText = computed((): string => {
-    if (props.task.status === TaskStatus.TO_DO) {
-        return 'Mark as in progress';
-    }
-    if (props.task.status === TaskStatus.IN_PROGRESS) {
-        return 'Mark as complete';
-    }
-    return '';
-});
-
-const alertDescription = computed((): string => {
-    if (props.task.status === TaskStatus.TO_DO) {
-        return 'This will mark the task as in progress.';
-    }
-    if (props.task.status === TaskStatus.IN_PROGRESS) {
-        return 'This will mark the task as completed.';
-    }
-    return '';
 });
 </script>
 
 <template>
     <ConfirmAlert
         :request-is-active="isUpdating"
-        :description="alertDescription"
+        :description="statusConfig?.description ?? ''"
         confirm-label="Update status"
         v-model:open="showAlert"
         @submit="updateStatusRequest"
     />
+
     <TooltipButton
-        v-if="icon !== null"
-        :icon="icon"
-        :tooltip="tooltipText"
+        v-if="statusConfig"
+        :icon="statusConfig.icon"
+        :tooltip="statusConfig.tooltip"
         :disabled="isUpdating"
         @click="showAlert = true"
     />

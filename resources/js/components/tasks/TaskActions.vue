@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import EditTaskButton from '@/components/tasks/EditTaskButton.vue';
-import TaskDeleteDialog from '@/components/tasks/TaskDeleteDialog.vue';
-import TaskLabel from '@/components/tasks/TaskLabel.vue';
+import { destroy } from '@/actions/App/Http/Controllers/TaskController';
+import DeleteDialogButton from '@/components/tasks/DeleteDialogButton.vue';
+import EditButton from '@/components/tasks/EditButton.vue';
+import TaskLabelPicker from '@/components/tasks/TaskLabelPicker.vue';
 import UpdateTaskStatus from '@/components/tasks/UpdateTaskStatus.vue';
 import { usePageMatch } from '@/composables/usePageMatch';
 import type { Label } from '@/types/labels/Label';
@@ -11,7 +12,7 @@ const emit = defineEmits<{
     (e: 'edit', task: Task): void;
 }>();
 
-const props = defineProps<{
+const { task, labels } = defineProps<{
     task: Task;
     labels: Label[];
 }>();
@@ -20,13 +21,13 @@ const { isMatch: isTodayMatch } = usePageMatch('tasks/Today');
 </script>
 
 <template>
-    <div>
-        <UpdateTaskStatus v-if="isTodayMatch" :task="props.task" />
+    <div class="flex items-center gap-2">
+        <UpdateTaskStatus v-if="isTodayMatch" :task="task" />
 
-        <EditTaskButton @edit="emit('edit', $event)" :task="props.task" />
+        <EditButton @edit="emit('edit', task)" tooltip="Edit task" />
 
-        <TaskLabel :task="task" :labels="labels" />
+        <TaskLabelPicker v-if="!task.is_virtual" :task="task" :labels="labels" />
 
-        <TaskDeleteDialog :task="props.task" />
+        <DeleteDialogButton v-if="!task.is_virtual" :delete-url="destroy(task.id)" />
     </div>
 </template>

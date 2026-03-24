@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { store, update } from '@/actions/App/Http/Controllers/TaskController';
+import {
+    store,
+    update,
+} from '@/actions/App/Http/Controllers/RecurringTaskTemplateController';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
     Dialog,
     DialogContent,
@@ -12,11 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import {
     Select,
     SelectContent,
     SelectGroup,
@@ -26,61 +23,57 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { TaskPriority } from '@/enums/TaskPriority';
-import { cn } from '@/lib/utils';
+import { TaskRecur } from '@/enums/TaskRecur';
+import { Weekday } from '@/enums/Weekday';
 import { AppPageProps } from '@/types';
 import type { Label } from '@/types/labels/Label';
-import type { CreateTaskPayload } from '@/types/tasks/CreateTaskPayload';
-import type { Task } from '@/types/tasks/Task';
+import { CreateRecurringTaskTemplatePayload } from '@/types/recurring-task-templates/CreateRecurringTaskTemplatePayload';
+import { RecurringTaskTemplate } from '@/types/recurring-task-templates/RecurringTaskTemplate';
 import { capitalizeFirstLetter } from '@/utils/string';
 import type { RequestPayload } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
-import type { DateValue } from '@internationalized/date';
-import {
-    DateFormatter,
-    getLocalTimeZone,
-    parseDate,
-    today,
-} from '@internationalized/date';
-import { CalendarIcon } from 'lucide-vue-next';
 import { AcceptableValue } from 'reka-ui';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
-const { task, labels } = defineProps<{
-    task: Task | null;
+const { template, labels } = defineProps<{
+    template: RecurringTaskTemplate | null;
     labels: Label[];
 }>();
 
-const date = ref<DateValue | undefined>();
-const datePopover = ref<boolean>(false);
-const df = new DateFormatter('en-US', { dateStyle: 'long' });
+const recurOptions = Object.values(TaskRecur);
+const weekdayOptions = Object.values(Weekday);
+const recur = ref<TaskRecur | null>(null);
+const weekdays = ref<Weekday[]>([]);
 
 const isSubmitting = ref<boolean>(false);
 const title = ref<string>('');
 const description = ref<string>('');
 const priority = ref<TaskPriority | ''>('');
 const page = usePage<AppPageProps>();
-const selectedLabelIds = ref<number[]>((task?.labels ?? []).map((l) => l.id));
+const selectedLabelIds = ref<number[]>(
+    (template?.labels ?? []).map((l) => l.id),
+);
 const open = defineModel<boolean>('open', { default: false });
-
 const submitButtonText = computed(() => {
     if (isSubmitting.value) {
-        return task === null ? 'Creating...' : 'Updating...';
+        return template === null ? 'Creating...' : 'Updating...';
     }
-    return task === null ? 'Create task' : 'Update task';
+    return template === null ? 'Create task' : 'Update task';
 });
 
 const resetForm = () => {
     title.value = '';
     description.value = '';
-    date.value = undefined;
     priority.value = '';
-    selectedLabelIds.value = (task?.labels ?? []).map((l) => l.id);
+    selectedLabelIds.value = (template?.labels ?? []).map((l) => l.id);
+    recur.value = null;
+    weekdays.value = [];
 };
 
 watch(
-    () => task,
-    (t: Task | null) => {
+    () => template,
+    (t: RecurringTaskTemplate | null) => {
         if (!t) {
             resetForm();
             return;
@@ -88,9 +81,9 @@ watch(
         title.value = t.title;
         description.value = t.description ?? '';
         priority.value = t.priority;
-        const dateOnly = t.date.includes('T') ? t.date.split('T')[0] : t.date;
-        date.value = parseDate(dateOnly);
         selectedLabelIds.value = t.labels.map((l) => l.id);
+        weekdays.value = t.weekdays ?? [];
+        recur.value = t.recur ?? null;
     },
     { immediate: true },
 );
@@ -99,7 +92,11 @@ const isSubmitDisabled = computed(() => {
     if (isSubmitting.value) return true;
     if (!title.value) return true;
     if (!priority.value) return true;
-    return !date.value;
+    if (!recur.value) return true;
+    if (recur.value === TaskRecur.WEEKLY) {
+        return weekdays.value.length === 0;
+    }
+    return false;
 });
 
 const onLabelsChange = (val: AcceptableValue): void => {
@@ -109,21 +106,24 @@ const onLabelsChange = (val: AcceptableValue): void => {
 const submit = (): void => {
     if (
         title.value.length === 0 ||
-        date.value == null ||
-        priority.value === ''
+        priority.value === '' ||
+        recur.value == null
     ) {
         return;
     }
     submitRequest({
         title: title.value,
         description: description.value,
-        date: date.value.toString(),
         priority: priority.value,
         label_ids: selectedLabelIds.value,
+        recur: recur.value,
+        weekdays: recur.value === TaskRecur.WEEKLY ? weekdays.value : [],
     });
 };
 
-const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
+const submitRequest = (
+    payload: RequestPayload & CreateRecurringTaskTemplatePayload,
+): void => {
     isSubmitting.value = true;
     const options = {
         preserveScroll: true,
@@ -136,12 +136,10 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
             isSubmitting.value = false;
         },
     };
-    if (task === null) {
+    if (template === null) {
         router.post(store(), payload, options);
-    } else if (task.is_virtual) {
-        router.post(store(), { ...payload, recurring_task_template_id: task.recurring_task_template_id }, options);
     } else {
-        router.put(update(task.id), payload, options);
+        router.put(update(template.id), payload, options);
     }
 };
 </script>
@@ -154,15 +152,17 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
         >
             <DialogHeader>
                 <DialogTitle>
-                    <template v-if="task == null"> Add a new task </template>
-                    <template v-else> Update task </template>
+                    <template v-if="template == null">
+                        Add a new recurring task
+                    </template>
+                    <template v-else> Update recurring task </template>
                 </DialogTitle>
                 <DialogDescription>
-                    <template v-if="task == null">
-                        Create a task to plan your work.
+                    <template v-if="template == null">
+                        Create a recurring task to plan your work.
                     </template>
                     <template v-else>
-                        Update this task to keep your plan on track.
+                        Update this recurring task to keep your plan on track.
                     </template>
                 </DialogDescription>
             </DialogHeader>
@@ -184,42 +184,42 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
                     />
                 </div>
 
-                <Popover v-model:open="datePopover">
-                    <PopoverTrigger as-child>
-                        <Button
-                            variant="outline"
-                            :class="
-                                cn(
-                                    'w-full max-w-[280px] justify-start text-left font-normal',
-                                    !date && 'text-muted-foreground',
-                                )
-                            "
-                        >
-                            <CalendarIcon class="mr-2 h-4 w-4" />
-                            {{
-                                date
-                                    ? df.format(date.toDate(getLocalTimeZone()))
-                                    : 'Pick a date'
-                            }}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent class="w-auto p-0" align="center">
-                        <Calendar
-                            v-model="date"
-                            :initial-focus="true"
-                            layout="month-and-year"
-                            :minValue="today(getLocalTimeZone())"
-                            @update:model-value="
-                                (value) => {
-                                    if (value) {
-                                        date = value;
-                                        datePopover = false;
-                                    }
-                                }
-                            "
-                        />
-                    </PopoverContent>
-                </Popover>
+                <Select v-model="recur">
+                    <SelectTrigger class="w-full max-w-[280px]">
+                        <SelectValue placeholder="Recurring option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem
+                                v-for="option in recurOptions"
+                                :key="option"
+                                :value="option"
+                            >
+                                {{ capitalizeFirstLetter(option) }}
+                            </SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                <Select
+                    v-model="weekdays"
+                    multiple
+                    v-if="recur === TaskRecur.WEEKLY"
+                >
+                    <SelectTrigger class="w-full max-w-[280px]">
+                        <SelectValue placeholder="Choose recurring days" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem
+                                v-for="option in weekdayOptions"
+                                :key="option"
+                                :value="option"
+                            >
+                                {{ capitalizeFirstLetter(option) }}
+                            </SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
 
                 <Select v-model="priority">
                     <SelectTrigger class="w-full max-w-[280px]">

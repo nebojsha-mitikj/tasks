@@ -3,7 +3,7 @@ const { text } = defineProps<{ text?: string | null }>();
 </script>
 
 <template>
-    <p v-if="text" class="text-xs text-muted-foreground">
+    <p v-if="text != null && text !== ''" class="text-xs text-muted-foreground whitespace-pre-wrap">
         {{ text }}
     </p>
 </template>

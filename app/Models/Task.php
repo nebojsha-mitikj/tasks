@@ -8,6 +8,7 @@ use App\Enums\TaskPriorityEnum;
 use App\Enums\TaskStatusEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -67,6 +68,48 @@ class Task extends Model
     {
         return $this->belongsToMany(Label::class, 'label_task')
             ->withTimestamps();
+    }
+
+    public function scopeOrdered(Builder $query, bool $latestFirst = false): Builder
+    {
+        return $query
+            ->orderBy('date', $latestFirst ? 'DESC' : 'ASC')
+            ->orderByRaw(
+                "FIELD(status, '" . implode("','", TaskStatusEnum::ordered()) . "')"
+            )
+            ->orderBy('priority', 'desc')
+            ->orderBy('created_at', 'desc');
+    }
+
+    public static function sortCollection(SupportCollection $tasks): SupportCollection
+    {
+        $statusOrder = array_flip(TaskStatusEnum::ordered());
+        $priorityOrder = array_flip(TaskPriorityEnum::ordered());
+
+        return $tasks->sort(function ($a, $b) use ($statusOrder, $priorityOrder) {
+            $dateA = $a->date->timestamp;
+            $dateB = $b->date->timestamp;
+
+            if ($dateA !== $dateB) {
+                return $dateA <=> $dateB;
+            }
+
+            $statusA = $statusOrder[$a->status->value];
+            $statusB = $statusOrder[$b->status->value];
+
+            if ($statusA !== $statusB) {
+                return $statusA <=> $statusB;
+            }
+
+            $priorityA = $priorityOrder[$a->priority->value];
+            $priorityB = $priorityOrder[$b->priority->value];
+
+            if ($priorityA !== $priorityB) {
+                return $priorityA <=> $priorityB;
+            }
+
+            return $b->created_at <=> $a->created_at;
+        })->values();
     }
 
 

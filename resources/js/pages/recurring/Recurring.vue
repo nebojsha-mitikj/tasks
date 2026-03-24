@@ -1,17 +1,27 @@
 <script setup lang="ts">
+import RecurringTaskTemplates from '@/components/recurring-task-templates/RecurringTaskTemplates.vue';
+import RecurringTemplateFormDialog from '@/components/recurring-task-templates/RecurringTemplateFormDialog.vue';
 import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
+import { useRecurringTemplateDialog } from '@/composables/useRecurringTemplateDialog';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { recurringTemplates } from '@/routes/recurring';
+import { index } from '@/routes/recurring';
 import { type BreadcrumbItem } from '@/types';
+import type { Label } from '@/types/labels/Label';
+import type { RecurringTaskTemplate } from '@/types/recurring-task-templates/RecurringTaskTemplate';
 import { Head } from '@inertiajs/vue3';
 import { Plus } from 'lucide-vue-next';
 
+const { dialogOpen, editingTemplate, editTemplate, createTemplate } =
+    useRecurringTemplateDialog();
+
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Recurring',
-        href: recurringTemplates().url,
-    },
+    { title: 'Recurring', href: index().url },
 ];
+
+const { labels, templates } = defineProps<{
+    labels: Label[];
+    templates: RecurringTaskTemplate[];
+}>();
 </script>
 
 <template>
@@ -25,15 +35,31 @@ const breadcrumbs: BreadcrumbItem[] = [
                             Recurring tasks
                         </h1>
                         <p class="text-sm text-muted-foreground">
-                            <span
-                                >Tasks that repeat on a schedule so you never
-                                forget.</span
-                            >
+                            <span>
+                                Tasks that repeat on a schedule so you never
+                                forget.
+                            </span>
                         </p>
                     </div>
                 </div>
-                <TooltipButton :icon="Plus" tooltip="Add recurring task" />
+                <TooltipButton
+                    @click="createTemplate"
+                    :icon="Plus"
+                    tooltip="Add recurring task"
+                />
             </div>
+
+            <RecurringTaskTemplates
+                :templates="templates"
+                :labels="labels"
+                @edit="editTemplate"
+            />
         </div>
+
+        <RecurringTemplateFormDialog
+            v-model:open="dialogOpen"
+            :template="editingTemplate"
+            :labels="labels"
+        />
     </AppLayout>
 </template>

@@ -1,5 +1,6 @@
 import type { TaskPriority } from '@/enums/TaskPriority';
-import { TaskRecurEnum } from '@/enums/TaskRecurEnum';
+import { TaskRecur } from '@/enums/TaskRecur';
+import { Weekday } from '@/enums/Weekday';
 import { Label } from '@/types/labels/Label';
 import { RecurringTaskTemplatePeriod } from '@/types/recurring-task-templates/RecurringTaskTemplatePeriod';
 
@@ -8,7 +9,9 @@ export interface RecurringTaskTemplate {
     readonly user_id: number;
     title: string;
     description: string | null;
-    recur: TaskRecurEnum;
+    is_active: boolean;
+    recur: TaskRecur;
+    weekdays?: Weekday[];
     priority: TaskPriority;
     labels: Label[];
     periods: RecurringTaskTemplatePeriod[];

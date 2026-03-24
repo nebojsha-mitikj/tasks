@@ -11,7 +11,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { today, upcoming, history } from '@/routes/tasks';
-import { recurringTemplates } from '@/routes/recurring';
+import { index as recurringTemplates } from '@/routes/recurring';
 import { index as getLabels, show as getLabel } from '@/routes/labels';
 import { type NavSection, type AppPageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';

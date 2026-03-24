@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import { today } from '@/routes/tasks';
-import { type Task } from '@/types/tasks/Task';
-import { Head } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
 import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
+import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
+import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
 import TasksSection from '@/components/tasks/TasksSection.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
-import { countCompleted } from '@/utils/taskCounts'
+import AppLayout from '@/layouts/AppLayout.vue';
+import { today } from '@/routes/tasks';
 import type { BreadcrumbItem } from '@/types';
-import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
 import type { Label } from '@/types/labels/Label';
+import { type Task } from '@/types/tasks/Task';
+import { countCompleted } from '@/utils/taskCounts';
+import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
-const { tasks } = defineProps<{
+const { tasks, labels } = defineProps<{
     tasks: Task[];
     labels: Label[];
 }>();

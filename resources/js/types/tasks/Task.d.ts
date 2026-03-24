@@ -12,6 +12,7 @@ export interface Task {
     status: TaskStatus;
     priority: TaskPriority;
     labels: Label[];
+    is_virtual: boolean;
     created_at: string;
     updated_at: string;
 }

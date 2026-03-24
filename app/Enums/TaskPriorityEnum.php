@@ -13,4 +13,14 @@ enum TaskPriorityEnum: string
     case LOW = 'low';
     case MEDIUM = 'medium';
     case HIGH = 'high';
+
+    public static function ordered(): array
+    {
+        return [
+            self::HIGH->value,
+            self::MEDIUM->value,
+            self::LOW->value,
+            self::NONE->value,
+        ];
+    }
 }
