@@ -85,11 +85,45 @@ class TaskController extends Controller
 
     public function upcoming(): Response
     {
+        $start = today()->addDay();
+        $end = today()->addDays(7);
+
+        $tasks = $this->tasksQuery()
+            ->whereBetween('date', [$start, $end])
+            ->get();
+
+        /** @var Collection $recurring */
+        $recurring = RecurringTaskTemplate::active()
+            ->belongsToUser(auth()->id())
+            ->with(['labels', 'weekdays'])
+            ->get();
+
+        $existingByTemplateAndDate = $tasks
+            ->filter(fn (Task $t) => $t->recurring_task_template_id !== null)
+            ->groupBy(fn (Task $t) => $t->recurring_task_template_id . '_' . $t->date->toDateString());
+
+        $virtualTasks = collect();
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $dateStr = $date->toDateString();
+            foreach ($recurring as $template) {
+                if (! $template->isDueOnDate($date)) {
+                    continue;
+                }
+                $key = $template->id . '_' . $dateStr;
+                if ($existingByTemplateAndDate->has($key)) {
+                    continue;
+                }
+                $virtualTasks->push($this->virtualTaskFromTemplate($template, $date->copy()));
+            }
+        }
+
+        $tasksByDate = $tasks->concat($virtualTasks->all())
+            ->groupBy(fn (Task $t) => $t->date->toDateString())
+            ->map(fn ($group) => Task::sortCollection($group))
+            ->sortKeys();
+
         return Inertia::render('tasks/Upcoming', [
-            'tasksByDate' => $this->tasksQuery()
-                ->whereBetween('date', [today()->addDay(), today()->addDays(7)])
-                ->get()
-                ->groupBy(fn($task) => $task->date->toDateString())
+            'tasksByDate' => $tasksByDate,
         ]);
     }
 
