@@ -20,12 +20,15 @@ defineProps<{
 </script>
 
 <template>
+    <Head title="Log in" />
+
     <AuthBase
         title="Log in to your account"
         description="Enter your email and password below to log in"
+        :nav-href="canRegister ? register() : undefined"
+        :nav-label="canRegister ? 'Register' : undefined"
     >
-        <Head title="Log in" />
-
+        <!-- Status -->
         <div
             v-if="status"
             class="mb-4 text-center text-sm font-medium text-green-600"
@@ -33,6 +36,7 @@ defineProps<{
             {{ status }}
         </div>
 
+        <!-- Form -->
         <Form
             v-bind="store.form()"
             :reset-on-success="['password']"
@@ -40,70 +44,90 @@ defineProps<{
             class="flex flex-col gap-6"
         >
             <div class="grid gap-6">
+                <!-- Email -->
                 <div class="grid gap-2">
                     <Label for="email">Email address</Label>
+
                     <Input
                         id="email"
                         type="email"
                         name="email"
                         required
                         autofocus
-                        :tabindex="1"
                         autocomplete="email"
                         placeholder="email@example.com"
+                        :tabindex="1"
                     />
+
                     <InputError :message="errors.email" />
                 </div>
 
+                <!-- Password -->
                 <div class="grid gap-2">
                     <div class="flex items-center justify-between">
                         <Label for="password">Password</Label>
+
                         <TextLink
                             v-if="canResetPassword"
                             :href="request()"
                             class="text-sm"
-                            :tabindex="5"
+                            :tabindex="4"
                         >
                             Forgot password?
                         </TextLink>
                     </div>
+
                     <Input
                         id="password"
                         type="password"
                         name="password"
                         required
-                        :tabindex="2"
                         autocomplete="current-password"
                         placeholder="Password"
+                        :tabindex="2"
                     />
+
                     <InputError :message="errors.password" />
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <Label for="remember" class="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" :tabindex="3" />
-                        <span>Remember me</span>
-                    </Label>
-                </div>
+                <!-- Remember -->
+                <Label
+                    for="remember"
+                    class="flex items-center space-x-3"
+                >
+                    <Checkbox
+                        id="remember"
+                        name="remember"
+                        :tabindex="3"
+                    />
+                    <span>Remember me</span>
+                </Label>
 
+                <!-- Submit -->
                 <Button
                     type="submit"
                     class="mt-4 w-full"
-                    :tabindex="4"
                     :disabled="processing"
+                    :tabindex="5"
                     data-test="login-button"
                 >
-                    <Spinner v-if="processing" />
+                    <Spinner v-if="processing" class="mr-2" />
                     Log in
                 </Button>
             </div>
 
+            <!-- Footer -->
             <div
-                class="text-center text-sm text-muted-foreground"
                 v-if="canRegister"
+                class="text-center text-sm text-muted-foreground"
             >
                 Don't have an account?
-                <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+                <TextLink
+                    :href="register()"
+                    :tabindex="6"
+                >
+                    Sign up
+                </TextLink>
             </div>
         </Form>
     </AuthBase>
