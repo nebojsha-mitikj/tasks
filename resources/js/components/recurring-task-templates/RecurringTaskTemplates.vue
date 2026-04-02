@@ -22,16 +22,16 @@ const emit = defineEmits<{
 <template>
     <TaskListCard :items="templates" empty-text="No recurring tasks yet.">
         <template #row="{ item: template }">
-            <div class="flex-1 space-y-1">
+            <div class="flex-1 space-y-1.5 min-w-0">
                 <RecurringTemplateTitle :template="template" />
 
                 <DescriptionText :text="template.description" />
 
-                <PriorityText :priority="template.priority" />
-
-                <RecurringTemplatePattern :template="template" />
-
-                <LabelBadgeList :labels="template.labels" />
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <PriorityText :priority="template.priority" />
+                    <RecurringTemplatePattern :template="template" />
+                    <LabelBadgeList :labels="template.labels" />
+                </div>
             </div>
 
             <RecurringTemplateActions

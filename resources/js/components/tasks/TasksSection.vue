@@ -17,7 +17,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="mx-auto my-10 w-full max-w-4xl space-y-6">
+    <div class="mx-auto w-full max-w-4xl space-y-3">
         <PageTitle :title="props.title" :subtitle="props.subtitle" />
         <Tasks
             :tasks="props.tasks"

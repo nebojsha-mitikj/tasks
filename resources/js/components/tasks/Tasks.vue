@@ -7,6 +7,7 @@ import TaskActions from '@/components/tasks/TaskActions.vue';
 import TaskStatus from '@/components/tasks/TaskStatus.vue';
 import TaskTitle from '@/components/tasks/TaskTitle.vue';
 import { usePageMatch } from '@/composables/usePageMatch';
+import { TaskPriority } from '@/enums/TaskPriority';
 import { TaskStatus as TaskStatusEnum } from '@/enums/TaskStatus';
 import type { Label } from '@/types/labels/Label';
 import type { Task } from '@/types/tasks/Task';
@@ -22,24 +23,44 @@ const emit = defineEmits<{
 
 const { isMatch: isTodayMatch } = usePageMatch('tasks/Today');
 const { isMatch: isHistoryMatch } = usePageMatch('tasks/History');
+
+const priorityDot: Record<TaskPriority, string> = {
+    [TaskPriority.HIGH]:   'bg-[#444] dark:bg-[#bbb]',
+    [TaskPriority.MEDIUM]: 'bg-[#999] dark:bg-[#777]',
+    [TaskPriority.LOW]:    'bg-[#ccc] dark:bg-[#444]',
+    [TaskPriority.NONE]:   'bg-transparent',
+};
 </script>
 
 <template>
-    <TaskListCard :items="tasks" empty-text="No tasks for today.">
+    <TaskListCard :items="tasks" empty-text="No tasks.">
         <template #row="{ item: task }">
-            <div class="flex-1 space-y-1">
+            <!-- Priority dot indicator -->
+            <div
+                class="mt-1.5 size-1.5 flex-shrink-0 rounded-full"
+                :class="task.status === TaskStatusEnum.COMPLETED
+                    ? 'bg-black/[0.1] dark:bg-white/[0.1]'
+                    : priorityDot[task.priority]"
+            />
+
+            <div class="flex-1 space-y-1.5 min-w-0">
                 <TaskTitle :task="task" />
 
                 <DescriptionText :text="task.description" />
 
-                <template v-if="!isHistoryMatch">
-                    <TaskStatus v-if="isTodayMatch" :task="task" />
-                    <PriorityText
-                        v-if="task.status !== TaskStatusEnum.COMPLETED"
-                        :priority="task.priority"
-                    />
-                </template>
-                <LabelBadgeList :labels="task.labels" />
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <template v-if="!isHistoryMatch">
+                        <TaskStatus
+                            v-if="isTodayMatch && task.status === TaskStatusEnum.IN_PROGRESS"
+                            :task="task"
+                        />
+                        <PriorityText
+                            v-if="task.status !== TaskStatusEnum.COMPLETED"
+                            :priority="task.priority"
+                        />
+                    </template>
+                    <LabelBadgeList :labels="task.labels" />
+                </div>
             </div>
 
             <TaskActions

@@ -11,15 +11,25 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <div class="space-y-1">
+    <div
+        v-if="labels.length"
+        class="rounded-xl bg-white shadow-sm ring-1 ring-black/[0.07] ring-inset dark:bg-[#111] dark:ring-white/[0.07]"
+    >
         <div
             v-for="label in labels"
             :key="label.id"
-            class="group flex items-center justify-between rounded-xl px-6 py-2 hover:bg-muted/50"
+            class="flex items-center justify-between border-b border-black/[0.05] px-5 py-3.5 transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl last:border-b-0 hover:bg-black/[0.025] dark:border-white/[0.05] dark:hover:bg-white/[0.025]"
         >
-            <LabelName :name="label.name" />
-
+            <LabelName :id="label.id" :name="label.name" />
             <LabelActions @edit="emit('edit', $event)" :label="label" />
         </div>
+    </div>
+
+    <div
+        v-else
+        class="rounded-xl border border-black/[0.07] bg-white px-6 py-12 text-center shadow-sm dark:border-white/[0.07] dark:bg-[#111]"
+    >
+        <p class="text-[15px] font-semibold text-[#111] dark:text-white">No labels yet</p>
+        <p class="mt-1 text-sm text-[#999] dark:text-[#666]">Create one to organize your tasks.</p>
     </div>
 </template>

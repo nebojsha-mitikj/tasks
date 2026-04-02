@@ -2,10 +2,10 @@
 import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
 import EmptyTasksMessage from '@/components/tasks/EmptyTasksMessage.vue';
 import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
-import TasksSection from '@/components/tasks/TasksSection.vue';
+import Tasks from '@/components/tasks/Tasks.vue';
 import { useTaskDialog } from '@/composables/useTaskDialog';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { history } from '@/routes/tasks';
+import { upcoming } from '@/routes/tasks';
 import { BreadcrumbItem } from '@/types';
 import { LabelWithTasks } from '@/types/labels/Label';
 import type { Task } from '@/types/tasks/Task';
@@ -14,13 +14,13 @@ import { Head } from '@inertiajs/vue3';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
 
-const { tasksByDate } = defineProps<{
+const { tasksByDate, labels } = defineProps<{
     tasksByDate: Record<string, Task[]>;
     labels: LabelWithTasks[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Upcoming', href: history().url },
+    { title: 'Upcoming', href: upcoming().url },
 ];
 </script>
 
@@ -32,15 +32,45 @@ const breadcrumbs: BreadcrumbItem[] = [
             title="No upcoming tasks"
         />
 
-        <TasksSection
-            v-for="(tasks, date) in tasksByDate"
-            @edit-task="editTask"
-            :key="date"
-            :tasks="tasks"
-            :title="formatDate(date)"
-            :subtitle="'Your scheduled tasks for ' + date + '.'"
-            :labels="labels"
-        />
+        <div v-else class="mx-auto my-8 w-full max-w-4xl space-y-8">
+            <!-- Page header -->
+            <div>
+                <h1
+                    class="text-2xl font-bold tracking-tight text-[#111] dark:text-white"
+                >
+                    Upcoming
+                </h1>
+                <p class="mt-1 text-sm text-[#888] dark:text-[#666]">
+                    Your tasks for the next few days.
+                </p>
+            </div>
+
+            <!-- Date sections -->
+            <div class="space-y-6">
+                <div
+                    v-for="(tasks, date) in tasksByDate"
+                    :key="date"
+                    class="space-y-2"
+                >
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="text-[11px] font-semibold tracking-wide text-[#999] dark:text-[#666]"
+                        >
+                            {{ formatDate(date) }}
+                        </span>
+                        <div
+                            class="h-px flex-1 bg-black/[0.06] dark:bg-white/[0.06]"
+                        />
+                        <span
+                            class="text-[11px] text-[#ccc] dark:text-[#555]"
+                            >{{ tasks.length }}</span
+                        >
+                    </div>
+                    <Tasks :tasks="tasks" :labels="labels" @edit="editTask" />
+                </div>
+            </div>
+        </div>
+
         <TaskFormDialog
             v-model:open="dialogOpen"
             :task="editingTask"

@@ -9,11 +9,10 @@ const props = defineProps<{
 
 <template>
     <p
-        class="font-medium"
-        :class="{
-            'text-muted-foreground line-through':
-                props.task.status === TaskStatus.COMPLETED,
-        }"
+        class="text-[15px] font-medium leading-snug"
+        :class="props.task.status === TaskStatus.COMPLETED
+            ? 'text-[#bbb] line-through dark:text-[#555]'
+            : 'text-[#111] dark:text-white'"
     >
         {{ props.task.title }}
     </p>

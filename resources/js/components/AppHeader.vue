@@ -1,282 +1,391 @@
 <script setup lang="ts">
-import AppLogo from '@/components/AppLogo.vue';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
-import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuList,
-    navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { getInitials } from '@/composables/useInitials';
 import { toUrl, urlIsActive } from '@/lib/utils';
-import { today } from '@/routes/tasks';
-import type { BreadcrumbItem, NavItem } from '@/types';
-import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, Star, Menu, Search } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { show as getLabel, index as getLabels } from '@/routes/labels';
+import { index as recurringTemplates } from '@/routes/recurring';
+import { history, today, upcoming } from '@/routes/tasks';
+import type { AppPageProps, NavItem } from '@/types';
+import { Link, usePage } from '@inertiajs/vue3';
+import {
+    Calendar,
+    ChevronDown,
+    Circle,
+    Clock,
+    History,
+    Menu,
+    Repeat,
+    Star,
+    Tag,
+    X,
+} from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
-interface Props {
-    breadcrumbs?: BreadcrumbItem[];
-}
+type Label = { id: number; name: string };
 
-const props = withDefaults(defineProps<Props>(), {
-    breadcrumbs: () => [],
-});
-
-const page = usePage();
+const page = usePage<AppPageProps<{ labels: Label[] }>>();
 const auth = computed(() => page.props.auth);
+const labels = computed(() => page.props.labels ?? []);
+const mobileOpen = ref(false);
+const labelsOpen = ref(false);
+const moreOpen = ref(false);
+
+const isMoreActive = computed(
+    () => page.url.startsWith('/upcoming') || page.url.startsWith('/history'),
+);
 
 const isCurrentRoute = computed(
-    () => (url: NonNullable<InertiaLinkProps['href']>) =>
-        urlIsActive(url, page.url),
+    () => (item: NavItem) => urlIsActive(item.href, page.url),
 );
 
-const activeItemStyles = computed(
-    () => (url: NonNullable<InertiaLinkProps['href']>) =>
-        isCurrentRoute.value(toUrl(url))
-            ? 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
-            : '',
-);
+const navItems: NavItem[] = [{ title: 'Today', href: today(), icon: Star }];
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Today',
-        href: today(),
-        icon: Star,
-    },
-];
+// Touch flags — suppress the synthetic mouseenter+click that fire after touchstart
+let touchHandledMore = false;
+let touchHandledLabels = false;
 
-const rightNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+function onMoreMouseEnter() {
+    if (touchHandledMore) return;
+    moreOpen.value = true;
+}
+function onMoreChevronTouch() {
+    touchHandledMore = true;
+    moreOpen.value = !moreOpen.value;
+}
+function onMoreChevronClick() {
+    if (touchHandledMore) { touchHandledMore = false; return; }
+    moreOpen.value = !moreOpen.value;
+}
+
+function onLabelsMouseEnter() {
+    if (touchHandledLabels) return;
+    labelsOpen.value = true;
+}
+function onLabelsChevronTouch() {
+    touchHandledLabels = true;
+    labelsOpen.value = !labelsOpen.value;
+}
+function onLabelsChevronClick() {
+    if (touchHandledLabels) { touchHandledLabels = false; return; }
+    labelsOpen.value = !labelsOpen.value;
+}
 </script>
 
 <template>
-    <div>
-        <div class="border-b border-sidebar-border/80">
-            <div class="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-                <!-- Mobile Menu -->
-                <div class="lg:hidden">
-                    <Sheet>
-                        <SheetTrigger :as-child="true">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                class="mr-2 h-9 w-9"
-                            >
-                                <Menu class="h-5 w-5" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left" class="w-[300px] p-6">
-                            <SheetTitle class="sr-only"
-                                >Navigation Menu</SheetTitle
-                            >
-                            <SheetHeader class="flex justify-start text-left">
-                                <AppLogoIcon
-                                    class="size-6 fill-current text-black dark:text-white"
-                                />
-                            </SheetHeader>
-                            <div
-                                class="flex h-full flex-1 flex-col justify-between space-y-4 py-6"
-                            >
-                                <nav class="-mx-3 space-y-1">
-                                    <Link
-                                        v-for="item in mainNavItems"
-                                        :key="item.title"
-                                        :href="item.href"
-                                        class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
-                                        :class="activeItemStyles(item.href)"
-                                    >
-                                        <component
-                                            v-if="item.icon"
-                                            :is="item.icon"
-                                            class="h-5 w-5"
-                                        />
-                                        {{ item.title }}
-                                    </Link>
-                                </nav>
-                                <div class="flex flex-col space-y-4">
-                                    <a
-                                        v-for="item in rightNavItems"
-                                        :key="item.title"
-                                        :href="toUrl(item.href)"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="flex items-center space-x-2 text-sm font-medium"
-                                    >
-                                        <component
-                                            v-if="item.icon"
-                                            :is="item.icon"
-                                            class="h-5 w-5"
-                                        />
-                                        <span>{{ item.title }}</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
-                </div>
+    <header
+        class="sticky top-0 z-10 border-b border-black/[0.06] bg-[#f7f7f5]/90 backdrop-blur-md dark:border-white/[0.06] dark:bg-[#0c0c0b]/90"
+    >
+        <div
+            class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4 sm:px-8"
+        >
+            <!-- Logo -->
+            <Link
+                :href="today()"
+                class="text-xl font-black transition-all hover:scale-[1.02] hover:opacity-70"
+                >nebbo</Link
+            >
 
-                <Link :href="today()" class="flex items-center gap-x-2">
-                    <AppLogo />
+            <!-- Desktop Nav -->
+            <nav class="hidden items-center gap-1 md:flex">
+                <Link
+                    v-for="item in navItems"
+                    :key="item.title"
+                    :href="item.href"
+                    class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        isCurrentRoute(item)
+                            ? 'bg-black/[0.06] text-[#111] dark:bg-white/[0.08] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                >
+                    <component :is="item.icon" class="size-3.5" />
+                    {{ item.title }}
                 </Link>
 
-                <!-- Desktop Menu -->
-                <div class="hidden h-full lg:flex lg:flex-1">
-                    <NavigationMenu class="ml-10 flex h-full items-stretch">
-                        <NavigationMenuList
-                            class="flex h-full items-stretch space-x-2"
+                <!-- More hover dropdown (Upcoming + History) -->
+                <div
+                    class="relative"
+                    @mouseenter="onMoreMouseEnter"
+                    @mouseleave="moreOpen = false"
+                >
+                    <div
+                        class="flex items-center rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        :class="
+                            isMoreActive
+                                ? 'bg-black/[0.06] text-[#111] dark:bg-white/[0.08] dark:text-white'
+                                : 'text-[#555] dark:text-[#888]'
+                        "
+                    >
+                        <Link
+                            :href="upcoming()"
+                            class="flex items-center gap-1.5 rounded-l-md py-1.5 pl-3 pr-2 text-sm font-medium outline-none"
                         >
-                            <NavigationMenuItem
-                                v-for="(item, index) in mainNavItems"
-                                :key="index"
-                                class="relative flex h-full items-center"
-                            >
-                                <Link
-                                    :class="[
-                                        navigationMenuTriggerStyle(),
-                                        activeItemStyles(item.href),
-                                        'h-9 cursor-pointer px-3',
-                                    ]"
-                                    :href="item.href"
-                                >
-                                    <component
-                                        v-if="item.icon"
-                                        :is="item.icon"
-                                        class="mr-2 h-4 w-4"
-                                    />
-                                    {{ item.title }}
-                                </Link>
-                                <div
-                                    v-if="isCurrentRoute(item.href)"
-                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"
-                                ></div>
-                            </NavigationMenuItem>
-                        </NavigationMenuList>
-                    </NavigationMenu>
-                </div>
-
-                <div class="ml-auto flex items-center space-x-2">
-                    <div class="relative flex items-center space-x-1">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            class="group h-9 w-9 cursor-pointer"
+                            <Clock class="size-3.5" />
+                            Timeline
+                        </Link>
+                        <button
+                            type="button"
+                            class="flex cursor-pointer items-center rounded-r-md py-1.5 pr-2 pl-0.5 outline-none"
+                            @touchstart.passive="onMoreChevronTouch"
+                            @click.stop="onMoreChevronClick"
                         >
-                            <Search
-                                class="size-5 opacity-80 group-hover:opacity-100"
-                            />
-                        </Button>
-
-                        <div class="hidden space-x-1 lg:flex">
-                            <template
-                                v-for="item in rightNavItems"
-                                :key="item.title"
-                            >
-                                <TooltipProvider :delay-duration="0">
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                as-child
-                                                class="group h-9 w-9 cursor-pointer"
-                                            >
-                                                <a
-                                                    :href="toUrl(item.href)"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <span class="sr-only">{{
-                                                        item.title
-                                                    }}</span>
-                                                    <component
-                                                        :is="item.icon"
-                                                        class="size-5 opacity-80 group-hover:opacity-100"
-                                                    />
-                                                </a>
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ item.title }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </template>
-                        </div>
+                            <ChevronDown class="size-3" />
+                        </button>
                     </div>
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger :as-child="true">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
-                            >
-                                <Avatar
-                                    class="size-8 overflow-hidden rounded-full"
-                                >
-                                    <AvatarImage
-                                        v-if="auth.user.avatar"
-                                        :src="auth.user.avatar"
-                                        :alt="auth.user.name"
-                                    />
-                                    <AvatarFallback
-                                        class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
-                                    >
-                                        {{ getInitials(auth.user?.name) }}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" class="w-56">
-                            <UserMenuContent :user="auth.user" />
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div
+                        v-show="moreOpen"
+                        class="absolute top-full left-0 z-50 h-2 w-36"
+                    />
+
+                    <div
+                        v-show="moreOpen"
+                        class="absolute top-[calc(100%+0.5rem)] left-0 z-50 w-36 rounded-md border border-black/[0.08] bg-white py-1 shadow-md dark:border-white/[0.08] dark:bg-[#111]"
+                    >
+                        <Link
+                            :href="upcoming()"
+                            class="flex items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                            :class="
+                                urlIsActive(upcoming(), page.url)
+                                    ? 'text-[#111] dark:text-white'
+                                    : 'text-[#555] dark:text-[#999]'
+                            "
+                            @click="moreOpen = false"
+                        >
+                            <Calendar class="size-3.5" />
+                            Upcoming
+                        </Link>
+                        <Link
+                            :href="history()"
+                            class="flex items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                            :class="
+                                urlIsActive(history(), page.url)
+                                    ? 'text-[#111] dark:text-white'
+                                    : 'text-[#555] dark:text-[#999]'
+                            "
+                            @click="moreOpen = false"
+                        >
+                            <History class="size-3.5" />
+                            History
+                        </Link>
+                    </div>
                 </div>
+
+                <!-- Recurring -->
+                <Link
+                    :href="recurringTemplates()"
+                    class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        urlIsActive(recurringTemplates(), page.url)
+                            ? 'bg-black/[0.06] text-[#111] dark:bg-white/[0.08] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                >
+                    <Repeat class="size-3.5" />
+                    Recurring
+                </Link>
+
+                <!-- Labels hover dropdown -->
+                <div
+                    class="relative"
+                    @mouseenter="onLabelsMouseEnter"
+                    @mouseleave="labelsOpen = false"
+                >
+                    <div
+                        class="flex items-center rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        :class="
+                            page.url.startsWith('/labels')
+                                ? 'bg-black/[0.06] text-[#111] dark:bg-white/[0.08] dark:text-white'
+                                : 'text-[#555] dark:text-[#888]'
+                        "
+                    >
+                        <Link
+                            :href="getLabels()"
+                            class="flex items-center gap-1.5 rounded-l-md py-1.5 pl-3 pr-2 text-sm font-medium outline-none"
+                        >
+                            <Tag class="size-3.5" />
+                            Labels
+                        </Link>
+                        <button
+                            type="button"
+                            class="flex cursor-pointer items-center rounded-r-md py-1.5 pr-2 pl-0.5 outline-none"
+                            @touchstart.passive="onLabelsChevronTouch"
+                            @click.stop="onLabelsChevronClick"
+                        >
+                            <ChevronDown class="size-3" />
+                        </button>
+                    </div>
+
+                    <!-- invisible bridge so fast mouse movement doesn't leave the hover zone -->
+                    <div
+                        v-show="labelsOpen"
+                        class="absolute top-full left-0 z-50 h-2 w-48"
+                    />
+
+                    <div
+                        v-show="labelsOpen"
+                        class="absolute top-[calc(100%+0.5rem)] left-0 z-50 w-48 rounded-md border border-black/[0.08] bg-white py-1 shadow-md dark:border-white/[0.08] dark:bg-[#111]"
+                    >
+                        <Link
+                            v-for="label in labels"
+                            :key="label.id"
+                            :href="getLabel(label.id)"
+                            class="flex items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                            :class="
+                                toUrl(getLabel(label.id)) === page.url
+                                    ? 'text-[#111] dark:text-white'
+                                    : 'text-[#555] dark:text-[#999]'
+                            "
+                            @click="labelsOpen = false"
+                        >
+                            <Circle class="size-3" />
+                            {{ label.name }}
+                        </Link>
+                        <div
+                            v-if="labels.length > 0"
+                            class="my-1 border-t border-black/[0.06] dark:border-white/[0.06]"
+                        />
+                        <Link
+                            :href="getLabels()"
+                            class="flex items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                            :class="
+                                toUrl(getLabels()) === page.url
+                                    ? 'text-[#111] dark:text-white'
+                                    : 'text-[#555] dark:text-[#999]'
+                            "
+                            @click="labelsOpen = false"
+                        >
+                            <Tag class="size-3.5" />
+                            Manage Labels
+                        </Link>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Right side: user menu + mobile toggle -->
+            <div class="flex items-center gap-2">
+                <!-- User dropdown -->
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <button
+                            class="flex size-8 cursor-pointer items-center justify-center rounded-full border border-black/[0.1] bg-white text-xs font-semibold text-[#333] transition-colors hover:bg-black/[0.04] dark:border-white/[0.1] dark:bg-[#1a1a1a] dark:text-[#ccc] dark:hover:bg-white/[0.06]"
+                        >
+                            {{ getInitials(auth.user?.name) }}
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" class="w-56">
+                        <UserMenuContent :user="auth.user" />
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <!-- Mobile hamburger -->
+                <button
+                    class="flex size-8 items-center justify-center rounded-md transition-colors hover:bg-black/5 md:hidden dark:hover:bg-white/5"
+                    @click="mobileOpen = !mobileOpen"
+                >
+                    <X v-if="mobileOpen" class="size-5" />
+                    <Menu v-else class="size-5" />
+                </button>
             </div>
         </div>
 
+        <!-- Mobile Nav -->
         <div
-            v-if="props.breadcrumbs.length > 1"
-            class="flex w-full border-b border-sidebar-border/70"
+            v-if="mobileOpen"
+            class="border-t border-black/[0.06] px-6 py-3 md:hidden dark:border-white/[0.06]"
         >
-            <div
-                class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl"
-            >
-                <Breadcrumbs :breadcrumbs="breadcrumbs" />
-            </div>
+            <nav class="flex flex-col gap-1">
+                <Link
+                    v-for="item in navItems"
+                    :key="item.title"
+                    :href="item.href"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        isCurrentRoute(item)
+                            ? 'bg-black/[0.06] text-[#111] dark:bg-white/[0.08] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                    @click="mobileOpen = false"
+                >
+                    <component :is="item.icon" class="size-4" />
+                    {{ item.title }}
+                </Link>
+                <Link
+                    :href="upcoming()"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        urlIsActive(upcoming(), page.url)
+                            ? 'text-[#111] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                    @click="mobileOpen = false"
+                >
+                    <Calendar class="size-4" />
+                    Upcoming
+                </Link>
+                <Link
+                    :href="history()"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        urlIsActive(history(), page.url)
+                            ? 'text-[#111] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                    @click="mobileOpen = false"
+                >
+                    <History class="size-4" />
+                    History
+                </Link>
+                <Link
+                    :href="recurringTemplates()"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        urlIsActive(recurringTemplates(), page.url)
+                            ? 'bg-black/[0.06] text-[#111] dark:bg-white/[0.08] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                    @click="mobileOpen = false"
+                >
+                    <Repeat class="size-4" />
+                    Recurring
+                </Link>
+                <div
+                    class="my-1 border-t border-black/[0.06] dark:border-white/[0.06]"
+                />
+                <Link
+                    v-for="label in labels"
+                    :key="label.id"
+                    :href="getLabel(label.id)"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        toUrl(getLabel(label.id)) === page.url
+                            ? 'text-[#111] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                    @click="mobileOpen = false"
+                >
+                    <Circle class="size-3.5" />
+                    {{ label.name }}
+                </Link>
+                <Link
+                    :href="getLabels()"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    :class="
+                        toUrl(getLabels()) === page.url
+                            ? 'text-[#111] dark:text-white'
+                            : 'text-[#555] dark:text-[#888]'
+                    "
+                    @click="mobileOpen = false"
+                >
+                    <Tag class="size-4" />
+                    Manage Labels
+                </Link>
+            </nav>
         </div>
-    </div>
+    </header>
 </template>

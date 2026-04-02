@@ -7,11 +7,13 @@ const statusLabelMap: Record<TaskStatus, string> = {
 };
 
 const statusClassMap: Record<TaskStatus, string> = {
-    [TaskStatus.COMPLETED]: 'text-green-600',
-    [TaskStatus.IN_PROGRESS]: 'text-orange-600',
-    [TaskStatus.TO_DO]: 'text-yellow-600',
+    [TaskStatus.COMPLETED]: 'text-emerald-600 dark:text-emerald-500',
+    [TaskStatus.IN_PROGRESS]: 'text-amber-600 dark:text-amber-500',
+    [TaskStatus.TO_DO]: 'text-sky-600 dark:text-sky-500',
 };
 
-export const statusLabel = (status: TaskStatus): string => statusLabelMap[status];
+export const statusLabel = (status: TaskStatus): string =>
+    statusLabelMap[status];
 
-export const statusClass = (status: TaskStatus): string => statusClassMap[status];
+export const statusClass = (status: TaskStatus): string =>
+    statusClassMap[status];

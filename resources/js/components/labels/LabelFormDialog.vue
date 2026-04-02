@@ -1,20 +1,12 @@
 <script setup lang="ts">
 import { store, update } from '@/actions/App/Http/Controllers/LabelController';
-import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { AppPageProps } from '@/types';
 import type { CreateLabelPayload } from '@/types/labels/CreateLabelPayload';
 import type { Label } from '@/types/labels/Label';
 import type { RequestPayload } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
+import { Tag, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
@@ -29,11 +21,12 @@ const { label } = defineProps<{
 
 const open = defineModel<boolean>('open', { default: false });
 
+const isEditing = computed(() => label !== null);
+
 const submitButtonText = computed(() => {
-    if (isSubmitting.value) {
-        return label === null ? 'Creating...' : 'Updating...';
-    }
-    return label === null ? 'Create label' : 'Update label';
+    if (isSubmitting.value)
+        return isEditing.value ? 'Saving...' : 'Creating...';
+    return isEditing.value ? 'Save changes' : 'Create label';
 });
 
 const resetForm = () => {
@@ -53,9 +46,7 @@ watch(
 );
 
 const submit = (): void => {
-    if (name.value.length === 0) {
-        return;
-    }
+    if (name.value.trim().length === 0) return;
     submitRequest({ name: name.value });
 };
 
@@ -83,52 +74,79 @@ const submitRequest = (payload: RequestPayload & CreateLabelPayload): void => {
 <template>
     <Dialog v-model:open="open">
         <DialogContent
-            class="sm:max-w-2xl"
+            class="overflow-hidden sm:max-w-sm"
             @open-auto-focus="(e) => e.preventDefault()"
         >
-            <DialogHeader>
-                <DialogTitle>
-                    <template v-if="label == null"> Add a new label </template>
-                    <template v-else> Update label </template>
-                </DialogTitle>
-                <DialogDescription>
-                    <template v-if="label == null">
-                        Create a label to organize your work.
-                    </template>
-                    <template v-else>
-                        Update this label to organize your work.
-                    </template>
-                </DialogDescription>
-            </DialogHeader>
+            <!-- Header -->
+            <div
+                class="flex items-start justify-between border-b border-black/[0.06] px-6 py-5 dark:border-white/[0.06]"
+            >
+                <div class="flex items-center gap-3">
+                    <span
+                        class="flex size-8 items-center justify-center rounded-lg bg-black/[0.05] dark:bg-white/[0.06]"
+                    >
+                        <Tag class="size-4 text-[#555] dark:text-[#aaa]" />
+                    </span>
+                    <div>
+                        <h2
+                            class="text-base font-semibold text-[#111] dark:text-white"
+                        >
+                            {{ isEditing ? 'Edit label' : 'New label' }}
+                        </h2>
+                        <p class="text-[13px] text-[#999] dark:text-[#666]">
+                            {{
+                                isEditing
+                                    ? 'Rename this label.'
+                                    : 'Organize tasks with a label.'
+                            }}
+                        </p>
+                    </div>
+                </div>
+                <button
+                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-[#aaa] transition-colors hover:bg-black/[0.06] hover:text-[#555] dark:hover:bg-white/[0.06] dark:hover:text-[#ccc]"
+                    @click="open = false"
+                >
+                    <X class="size-4" />
+                </button>
+            </div>
 
-            <div class="space-y-4 py-2">
-                <div>
-                    <Input
+            <!-- Body -->
+            <div class="px-6 py-5">
+                <div class="space-y-1.5">
+                    <label
+                        class="text-[12px] font-semibold tracking-wide text-[#888] uppercase dark:text-[#666]"
+                        >Name</label
+                    >
+                    <input
                         v-model="name"
-                        placeholder="Label title"
-                        class="mt-1"
+                        placeholder="e.g. Work, Personal, Health…"
+                        class="w-full rounded-lg border border-black/[0.1] bg-[#fafafa] px-3 py-2 text-[14px] text-[#111] transition-colors outline-none placeholder:text-[#bbb] focus:border-black/30 focus:bg-white dark:border-white/[0.1] dark:bg-white/[0.04] dark:text-white dark:placeholder:text-[#555] dark:focus:border-white/30 dark:focus:bg-white/[0.06]"
+                        @keydown.enter="submit"
                     />
                 </div>
             </div>
 
-            <DialogFooter>
-                <Button
+            <!-- Footer -->
+            <div
+                class="flex items-center justify-end gap-2 border-t border-black/[0.06] px-6 py-4 dark:border-white/[0.06]"
+            >
+                <button
                     type="button"
-                    variant="outline"
-                    @click="open = false"
+                    class="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-[#555] transition-colors hover:bg-black/[0.05] disabled:opacity-50 dark:text-[#999] dark:hover:bg-white/[0.05]"
                     :disabled="isSubmitting"
+                    @click="open = false"
                 >
                     Cancel
-                </Button>
-
-                <Button
+                </button>
+                <button
                     type="button"
-                    @click="submit"
+                    class="cursor-pointer rounded-lg bg-[#111] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-40 dark:bg-white dark:text-[#111] dark:hover:bg-neutral-200"
                     :disabled="isSubmitting || !name"
+                    @click="submit"
                 >
                     {{ submitButtonText }}
-                </Button>
-            </DialogFooter>
+                </button>
+            </div>
         </DialogContent>
     </Dialog>
 </template>

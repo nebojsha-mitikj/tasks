@@ -1,66 +1,109 @@
 <script setup lang="ts">
+import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
+import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
+import Tasks from '@/components/tasks/Tasks.vue';
+import { useTaskDialog } from '@/composables/useTaskDialog';
 import AppLayout from '@/layouts/AppLayout.vue';
-import TaskSection from '@/components/tasks/TasksSection.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { LabelWithTasks } from '@/types/labels/Label';
 import type { Task } from '@/types/tasks/Task';
-import { Head } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
-import PageTitle from '@/components/tasks/PageTitle.vue';
-import { useTaskDialog } from '@/composables/useTaskDialog';
 import { formatDate, toDate } from '@/utils/date';
-const { dialogOpen, editingTask, editTask } = useTaskDialog();
+import { Head } from '@inertiajs/vue3';
+import { Tag } from 'lucide-vue-next';
+import { computed } from 'vue';
 
-const { label } = defineProps<{
+const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
+
+const { label, labels } = defineProps<{
     label: LabelWithTasks;
     labels: LabelWithTasks[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Labels', href: '/labels' },
-    { title: label.name, href: `/labels/${label.id}` }
+    { title: label.name, href: `/labels/${label.id}` },
 ];
 
 const tasksByDate = computed<Record<string, Task[]>>(() => {
-    return label.tasks.reduce<Record<string, Task[]>>((accumulator, task) => {
+    return label.tasks.reduce<Record<string, Task[]>>((acc, task) => {
         const key = toDate(task.date);
-        (accumulator[key] ??= []).push(task);
-        return accumulator;
+        (acc[key] ??= []).push(task);
+        return acc;
     }, {});
 });
 
-const title = computed(() => `${label.name}`);
-
-const subtitle = computed(() =>
-    label.tasks.length > 0
-        ? 'Tasks for this label.'
-        : 'No upcoming tasks for this label.',
-);
+const colorClass =
+    'text-[#888] bg-black/[0.05] dark:text-[#666] dark:bg-white/[0.06]';
 </script>
 
 <template>
     <Head :title="label.name" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="mx-auto my-8 w-full max-w-4xl space-y-6">
+            <!-- Header -->
+            <div class="flex items-center gap-4">
+                <span
+                    class="flex size-11 flex-shrink-0 items-center justify-center rounded-xl"
+                    :class="colorClass"
+                >
+                    <Tag class="size-5" />
+                </span>
+                <div>
+                    <h1
+                        class="text-2xl font-bold tracking-tight text-[#111] dark:text-white"
+                    >
+                        {{ label.name }}
+                    </h1>
+                    <p class="mt-0.5 text-sm text-[#888] dark:text-[#666]">
+                        {{
+                            label.tasks.length > 0
+                                ? label.tasks.length +
+                                  ' task' +
+                                  (label.tasks.length !== 1 ? 's' : '')
+                                : 'No tasks for this label.'
+                        }}
+                    </p>
+                </div>
+            </div>
 
-        <div class="mx-auto mt-10 w-full max-w-4xl space-y-6">
-            <PageTitle :title="title" :subtitle="subtitle"/>
-        </div>
+            <!-- Empty state -->
+            <div
+                v-if="label.tasks.length === 0"
+                class="rounded-xl border border-black/[0.07] bg-white px-6 py-12 text-center shadow-sm dark:border-white/[0.07] dark:bg-[#111]"
+            >
+                <p class="text-sm text-[#999] dark:text-[#666]">
+                    No tasks for this label yet.
+                </p>
+            </div>
 
-        <template v-if="label.tasks.length">
-            <div class="space-y-8">
-                <TaskSection
+            <!-- Date sections -->
+            <div v-else class="space-y-6">
+                <div
                     v-for="(tasks, date) in tasksByDate"
                     :key="date"
-                    :tasks="tasks"
-                    :labels="labels"
-                    :title="formatDate(date)"
-                    @editTask="editTask"
-                />
+                    class="space-y-2"
+                >
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="text-[11px] font-semibold tracking-wide text-[#999] dark:text-[#666]"
+                        >
+                            {{ formatDate(date) }}
+                        </span>
+                        <div
+                            class="h-px flex-1 bg-black/[0.06] dark:bg-white/[0.06]"
+                        />
+                    </div>
+                    <Tasks :tasks="tasks" :labels="labels" @edit="editTask" />
+                </div>
             </div>
-        </template>
+        </div>
 
-        <TaskFormDialog v-model:open="dialogOpen" :task="editingTask" />
+        <TaskFormDialog
+            :labels="labels"
+            v-model:open="dialogOpen"
+            :task="editingTask"
+        />
+        <CreateTaskButton @create="createTask" />
     </AppLayout>
 </template>

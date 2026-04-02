@@ -1,14 +1,6 @@
 <script setup lang="ts">
-import {
-    AlertDialog,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
+import { AlertTriangle } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const emit = defineEmits<{
@@ -25,9 +17,8 @@ const props = withDefaults(
         confirmLabel?: string;
     }>(),
     {
-        title: 'Are you absolutely sure?',
-        description:
-            'Please confirm that you want to continue with this action.',
+        title: 'Are you sure?',
+        description: 'This action cannot be undone.',
         confirmLabel: 'Confirm',
     },
 );
@@ -46,29 +37,52 @@ const submit = (): void => {
 <template>
     <AlertDialog v-model:open="openProxy">
         <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>{{ props.title }}</AlertDialogTitle>
-                <AlertDialogDescription>
-                    {{ props.description }}
-                </AlertDialogDescription>
-            </AlertDialogHeader>
+            <!-- Header -->
+            <div
+                class="border-b border-black/[0.06] px-6 py-5 dark:border-white/[0.06]"
+            >
+                <div class="flex items-center gap-3">
+                    <span
+                        class="flex size-8 items-center justify-center rounded-lg bg-red-50 dark:bg-red-500/10"
+                    >
+                        <AlertTriangle class="size-4 text-red-500" />
+                    </span>
+                    <div>
+                        <h2
+                            class="text-base font-semibold text-[#111] dark:text-white"
+                        >
+                            {{ props.title }}
+                        </h2>
+                        <p class="text-[13px] text-[#999] dark:text-[#666]">
+                            {{ props.description }}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-            <AlertDialogFooter>
-                <AlertDialogCancel :disabled="props.requestIsActive">
-                    Cancel
-                </AlertDialogCancel>
-                <Button
+            <!-- Footer -->
+            <div class="flex items-center justify-end gap-2 px-6 py-4">
+                <button
+                    type="button"
+                    class="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-[#555] transition-colors hover:bg-black/[0.05] disabled:opacity-50 dark:text-[#999] dark:hover:bg-white/[0.05]"
                     :disabled="props.requestIsActive"
-                    class="cursor-pointer"
+                    @click="openProxy = false"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    class="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+                    :disabled="props.requestIsActive"
                     @click="submit"
                 >
                     {{
                         props.requestIsActive
-                            ? 'Processing...'
+                            ? 'Deleting...'
                             : props.confirmLabel
                     }}
-                </Button>
-            </AlertDialogFooter>
+                </button>
+            </div>
         </AlertDialogContent>
     </AlertDialog>
 </template>

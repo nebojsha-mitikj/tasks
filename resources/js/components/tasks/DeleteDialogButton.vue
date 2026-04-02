@@ -39,7 +39,6 @@ const onDelete = (): void => {
         @click="showAlert = true"
         :icon="Trash2"
         tooltip="Delete"
-        variant="destructive"
         :disabled="isDeleting"
     />
 </template>

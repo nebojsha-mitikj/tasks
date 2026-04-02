@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import { store, update } from '@/actions/App/Http/Controllers/TaskController';
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
     Popover,
     PopoverContent,
@@ -24,7 +15,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { TaskPriority } from '@/enums/TaskPriority';
 import { cn } from '@/lib/utils';
 import { AppPageProps } from '@/types';
@@ -41,7 +31,7 @@ import {
     parseDate,
     today,
 } from '@internationalized/date';
-import { CalendarIcon } from 'lucide-vue-next';
+import { CalendarIcon, SquareCheck, X } from 'lucide-vue-next';
 import { AcceptableValue } from 'reka-ui';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
@@ -63,11 +53,12 @@ const page = usePage<AppPageProps>();
 const selectedLabelIds = ref<number[]>((task?.labels ?? []).map((l) => l.id));
 const open = defineModel<boolean>('open', { default: false });
 
+const isEditing = computed(() => task !== null);
+
 const submitButtonText = computed(() => {
-    if (isSubmitting.value) {
-        return task === null ? 'Creating...' : 'Updating...';
-    }
-    return task === null ? 'Create task' : 'Update task';
+    if (isSubmitting.value)
+        return isEditing.value ? 'Saving...' : 'Creating...';
+    return isEditing.value ? 'Save changes' : 'Create task';
 });
 
 const resetForm = () => {
@@ -95,25 +86,19 @@ watch(
     { immediate: true },
 );
 
-const isSubmitDisabled = computed(() => {
-    if (isSubmitting.value) return true;
-    if (!title.value) return true;
-    if (!priority.value) return true;
-    return !date.value;
-});
+const isSubmitDisabled = computed(
+    () => isSubmitting.value || !title.value || !priority.value || !date.value,
+);
 
 const onLabelsChange = (val: AcceptableValue): void => {
     selectedLabelIds.value = val as number[];
 };
 
 const submit = (): void => {
-    if (
-        title.value.length === 0 ||
-        date.value == null ||
-        priority.value === ''
-    ) {
+    if (!title.value.trim() || date.value == null || priority.value === '') {
         return;
     }
+    if (isSubmitting.value) return;
     submitRequest({
         title: title.value,
         description: description.value,
@@ -139,7 +124,14 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
     if (task === null) {
         router.post(store(), payload, options);
     } else if (task.is_virtual) {
-        router.post(store(), { ...payload, recurring_task_template_id: task.recurring_task_template_id }, options);
+        router.post(
+            store(),
+            {
+                ...payload,
+                recurring_task_template_id: task.recurring_task_template_id,
+            },
+            options,
+        );
     } else {
         router.put(update(task.id), payload, options);
     }
@@ -149,135 +141,210 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
 <template>
     <Dialog v-model:open="open">
         <DialogContent
-            class="sm:max-w-2xl"
+            class="overflow-hidden sm:max-w-lg"
             @open-auto-focus="(e) => e.preventDefault()"
         >
-            <DialogHeader>
-                <DialogTitle>
-                    <template v-if="task == null"> Add a new task </template>
-                    <template v-else> Update task </template>
-                </DialogTitle>
-                <DialogDescription>
-                    <template v-if="task == null">
-                        Create a task to plan your work.
-                    </template>
-                    <template v-else>
-                        Update this task to keep your plan on track.
-                    </template>
-                </DialogDescription>
-            </DialogHeader>
-
-            <div class="space-y-4 py-2">
-                <div>
-                    <Input
-                        v-model="title"
-                        placeholder="Task title"
-                        class="mt-1"
-                    />
-                </div>
-
-                <div>
-                    <Textarea
-                        v-model="description"
-                        placeholder="Add description"
-                        class="mt-1"
-                    />
-                </div>
-
-                <Popover v-model:open="datePopover">
-                    <PopoverTrigger as-child>
-                        <Button
-                            variant="outline"
-                            :class="
-                                cn(
-                                    'w-full max-w-[280px] justify-start text-left font-normal',
-                                    !date && 'text-muted-foreground',
-                                )
-                            "
-                        >
-                            <CalendarIcon class="mr-2 h-4 w-4" />
-                            {{
-                                date
-                                    ? df.format(date.toDate(getLocalTimeZone()))
-                                    : 'Pick a date'
-                            }}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent class="w-auto p-0" align="center">
-                        <Calendar
-                            v-model="date"
-                            :initial-focus="true"
-                            layout="month-and-year"
-                            :minValue="today(getLocalTimeZone())"
-                            @update:model-value="
-                                (value) => {
-                                    if (value) {
-                                        date = value;
-                                        datePopover = false;
-                                    }
-                                }
-                            "
+            <!-- Header -->
+            <div
+                class="flex items-start justify-between border-b border-black/[0.06] px-6 py-5 dark:border-white/[0.06]"
+            >
+                <div class="flex items-center gap-3">
+                    <span
+                        class="flex size-8 items-center justify-center rounded-lg bg-black/[0.05] dark:bg-white/[0.06]"
+                    >
+                        <SquareCheck
+                            class="size-4 text-[#555] dark:text-[#aaa]"
                         />
-                    </PopoverContent>
-                </Popover>
-
-                <Select v-model="priority">
-                    <SelectTrigger class="w-full max-w-[280px]">
-                        <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            :value="availablePriority"
-                            :key="availablePriority"
-                            v-for="availablePriority in Object.values(
-                                TaskPriority,
-                            )"
+                    </span>
+                    <div>
+                        <h2
+                            class="text-base font-semibold text-[#111] dark:text-white"
                         >
-                            {{ capitalizeFirstLetter(availablePriority) }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-
-                <Select
-                    multiple
-                    :model-value="selectedLabelIds"
-                    @update:model-value="onLabelsChange"
+                            {{ isEditing ? 'Edit task' : 'New task' }}
+                        </h2>
+                        <p class="text-[13px] text-[#999] dark:text-[#666]">
+                            {{
+                                isEditing
+                                    ? 'Update the details below.'
+                                    : 'Fill in the details to create a task.'
+                            }}
+                        </p>
+                    </div>
+                </div>
+                <button
+                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-[#aaa] transition-colors hover:bg-black/[0.06] hover:text-[#555] dark:hover:bg-white/[0.06] dark:hover:text-[#ccc]"
+                    @click="open = false"
                 >
-                    <SelectTrigger class="w-full max-w-[280px]">
-                        <SelectValue placeholder="Select labels" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem
-                                v-for="label in labels"
-                                :key="label.id"
-                                :value="label.id"
-                            >
-                                {{ label.name }}
-                            </SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
+                    <X class="size-4" />
+                </button>
             </div>
 
-            <DialogFooter>
-                <Button
+            <!-- Body -->
+            <div class="space-y-4 px-6 py-5">
+                <!-- Title -->
+                <div class="space-y-1.5">
+                    <label
+                        class="text-[12px] font-semibold tracking-wide text-[#888] uppercase dark:text-[#666]"
+                        >Title</label
+                    >
+                    <input
+                        v-model="title"
+                        placeholder="What needs to be done?"
+                        class="w-full rounded-lg border border-black/[0.1] bg-[#fafafa] px-3 py-2 text-[14px] text-[#111] transition-colors outline-none placeholder:text-[#bbb] focus:border-black/30 focus:bg-white dark:border-white/[0.1] dark:bg-white/[0.04] dark:text-white dark:placeholder:text-[#555] dark:focus:border-white/30 dark:focus:bg-white/[0.06]"
+                    />
+                </div>
+
+                <!-- Description -->
+                <div class="space-y-1.5">
+                    <label
+                        class="text-[12px] font-semibold tracking-wide text-[#888] uppercase dark:text-[#666]"
+                        >Description
+                        <span class="font-normal text-[#bbb] normal-case"
+                            >(optional)</span
+                        ></label
+                    >
+                    <textarea
+                        v-model="description"
+                        placeholder="Add more context..."
+                        rows="2"
+                        class="w-full resize-none rounded-lg border border-black/[0.1] bg-[#fafafa] px-3 py-2 text-[14px] text-[#111] transition-colors outline-none placeholder:text-[#bbb] focus:border-black/30 focus:bg-white dark:border-white/[0.1] dark:bg-white/[0.04] dark:text-white dark:placeholder:text-[#555] dark:focus:border-white/30 dark:focus:bg-white/[0.06]"
+                    />
+                </div>
+
+                <!-- Date + Priority row -->
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Date -->
+                    <div class="space-y-1.5">
+                        <label
+                            class="text-[12px] font-semibold tracking-wide text-[#888] uppercase dark:text-[#666]"
+                            >Date</label
+                        >
+                        <Popover v-model:open="datePopover">
+                            <PopoverTrigger as-child>
+                                <button
+                                    :class="
+                                        cn(
+                                            'flex w-full items-center gap-2 rounded-lg border border-black/[0.1] bg-[#fafafa] px-3 py-2 text-[14px] transition-colors outline-none hover:bg-white dark:border-white/[0.1] dark:bg-white/[0.04] dark:hover:bg-white/[0.06]',
+                                            date
+                                                ? 'text-[#111] dark:text-white'
+                                                : 'text-[#bbb] dark:text-[#555]',
+                                        )
+                                    "
+                                >
+                                    <CalendarIcon
+                                        class="size-3.5 flex-shrink-0"
+                                    />
+                                    <span class="truncate text-left">{{
+                                        date
+                                            ? df.format(
+                                                  date.toDate(
+                                                      getLocalTimeZone(),
+                                                  ),
+                                              )
+                                            : 'Pick a date'
+                                    }}</span>
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent class="w-auto p-0" align="start">
+                                <Calendar
+                                    v-model="date"
+                                    :initial-focus="true"
+                                    layout="month-and-year"
+                                    :minValue="today(getLocalTimeZone())"
+                                    @update:model-value="
+                                        (v) => {
+                                            if (v) {
+                                                date = v;
+                                                datePopover = false;
+                                            }
+                                        }
+                                    "
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+
+                    <!-- Priority -->
+                    <div class="space-y-1.5">
+                        <label
+                            class="text-[12px] font-semibold tracking-wide text-[#888] uppercase dark:text-[#666]"
+                            >Priority</label
+                        >
+                        <Select v-model="priority">
+                            <SelectTrigger
+                                class="w-full rounded-lg border-black/[0.1] bg-[#fafafa] text-[14px] dark:border-white/[0.1] dark:bg-white/[0.04]"
+                            >
+                                <SelectValue placeholder="Select…" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem
+                                    v-for="p in Object.values(TaskPriority)"
+                                    :key="p"
+                                    :value="p"
+                                >
+                                    {{ capitalizeFirstLetter(p) }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <!-- Labels -->
+                <div class="space-y-1.5">
+                    <label
+                        class="text-[12px] font-semibold tracking-wide text-[#888] uppercase dark:text-[#666]"
+                        >Labels
+                        <span class="font-normal text-[#bbb] normal-case"
+                            >(optional)</span
+                        ></label
+                    >
+                    <Select
+                        multiple
+                        :model-value="selectedLabelIds"
+                        @update:model-value="onLabelsChange"
+                    >
+                        <SelectTrigger
+                            class="w-full rounded-lg border-black/[0.1] bg-[#fafafa] text-[14px] dark:border-white/[0.1] dark:bg-white/[0.04]"
+                        >
+                            <SelectValue placeholder="Select labels…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem
+                                    v-for="label in labels"
+                                    :key="label.id"
+                                    :value="label.id"
+                                >
+                                    {{ label.name }}
+                                </SelectItem>
+                                <p v-if="!labels.length" class="px-3 py-2 text-sm text-[#999] dark:text-[#666]">No labels yet.</p>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div
+                class="flex items-center justify-end gap-2 border-t border-black/[0.06] px-6 py-4 dark:border-white/[0.06]"
+            >
+                <button
                     type="button"
-                    variant="outline"
-                    @click="open = false"
+                    class="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-[#555] transition-colors hover:bg-black/[0.05] disabled:opacity-50 dark:text-[#999] dark:hover:bg-white/[0.05]"
                     :disabled="isSubmitting"
+                    @click="open = false"
                 >
                     Cancel
-                </Button>
-
-                <Button
+                </button>
+                <button
                     type="button"
-                    @click="submit"
+                    class="cursor-pointer rounded-lg bg-[#111] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-40 dark:bg-white dark:text-[#111] dark:hover:bg-neutral-200"
                     :disabled="isSubmitDisabled"
+                    @click="submit"
                 >
                     {{ submitButtonText }}
-                </Button>
-            </DialogFooter>
+                </button>
+            </div>
         </DialogContent>
     </Dialog>
 </template>

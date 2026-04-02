@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import RecurringTaskTemplates from '@/components/recurring-task-templates/RecurringTaskTemplates.vue';
 import RecurringTemplateFormDialog from '@/components/recurring-task-templates/RecurringTemplateFormDialog.vue';
-import TooltipButton from '@/components/ui-custom/TooltipButton.vue';
+import CreateTaskButton from '@/components/tasks/CreateTaskButton.vue';
+import TaskFormDialog from '@/components/tasks/TaskFormDialog.vue';
 import { useRecurringTemplateDialog } from '@/composables/useRecurringTemplateDialog';
+import { useTaskDialog } from '@/composables/useTaskDialog';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { index } from '@/routes/recurring';
 import { type BreadcrumbItem } from '@/types';
@@ -13,6 +15,8 @@ import { Plus } from 'lucide-vue-next';
 
 const { dialogOpen, editingTemplate, editTemplate, createTemplate } =
     useRecurringTemplateDialog();
+
+const { dialogOpen: taskDialogOpen, editingTask, createTask } = useTaskDialog();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Recurring', href: index().url },
@@ -27,29 +31,42 @@ const { labels, templates } = defineProps<{
 <template>
     <Head title="Recurring" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="mx-auto my-10 w-full max-w-4xl space-y-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div>
-                        <h1 class="text-2xl font-semibold tracking-tight">
-                            Recurring tasks
-                        </h1>
-                        <p class="text-sm text-muted-foreground">
-                            <span>
-                                Tasks that repeat on a schedule so you never
-                                forget.
-                            </span>
-                        </p>
-                    </div>
+        <div class="mx-auto my-8 w-full max-w-4xl space-y-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1
+                        class="text-2xl font-bold tracking-tight text-[#111] dark:text-white"
+                    >
+                        Recurring tasks
+                    </h1>
+                    <p class="mt-1 text-sm text-[#888] dark:text-[#666]">
+                        Tasks that repeat on a schedule so you never forget.
+                    </p>
                 </div>
-                <TooltipButton
+                <button
                     @click="createTemplate"
-                    :icon="Plus"
-                    tooltip="Add recurring task"
-                />
+                    class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-black/[0.1] bg-white px-3 py-1.5 text-sm font-medium text-[#333] shadow-sm transition-colors hover:bg-black/[0.04] sm:w-auto sm:justify-start dark:border-white/[0.1] dark:bg-[#1a1a1a] dark:text-[#ccc] dark:hover:bg-white/[0.06]"
+                >
+                    <Plus class="size-3.5" />
+                    Add recurring
+                </button>
             </div>
 
+            <div
+                v-if="templates.length === 0"
+                class="rounded-xl border border-black/[0.07] bg-white px-6 py-12 text-center shadow-sm dark:border-white/[0.07] dark:bg-[#111]"
+            >
+                <p
+                    class="text-[15px] font-semibold text-[#111] dark:text-white"
+                >
+                    No recurring tasks yet
+                </p>
+                <p class="mt-1 text-sm text-[#999] dark:text-[#666]">
+                    Add one to keep your habits on track.
+                </p>
+            </div>
             <RecurringTaskTemplates
+                v-else
                 :templates="templates"
                 :labels="labels"
                 @edit="editTemplate"
@@ -61,5 +78,11 @@ const { labels, templates } = defineProps<{
             :template="editingTemplate"
             :labels="labels"
         />
+        <TaskFormDialog
+            :labels="labels"
+            v-model:open="taskDialogOpen"
+            :task="editingTask"
+        />
+        <CreateTaskButton @create="createTask" />
     </AppLayout>
 </template>
