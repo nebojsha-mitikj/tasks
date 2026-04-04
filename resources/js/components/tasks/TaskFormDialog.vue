@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { store, update } from '@/actions/App/Http/Controllers/TaskController';
 import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import {
     Popover,
     PopoverContent,
@@ -157,18 +157,18 @@ const submitRequest = (payload: RequestPayload & CreateTaskPayload): void => {
                         />
                     </span>
                     <div>
-                        <h2
+                        <DialogTitle
                             class="text-base font-semibold text-[#111] dark:text-white"
                         >
                             {{ isEditing ? 'Edit task' : 'New task' }}
-                        </h2>
-                        <p class="text-[13px] text-[#999] dark:text-[#666]">
+                        </DialogTitle>
+                        <DialogDescription class="text-[13px] text-[#999] dark:text-[#666]">
                             {{
                                 isEditing
                                     ? 'Update the details below.'
                                     : 'Fill in the details to create a task.'
                             }}
-                        </p>
+                        </DialogDescription>
                     </div>
                 </div>
                 <button

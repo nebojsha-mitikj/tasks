@@ -3,7 +3,7 @@ import {
     store,
     update,
 } from '@/actions/App/Http/Controllers/RecurringTaskTemplateController';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import {
     Select,
     SelectContent,
@@ -152,7 +152,7 @@ const submitRequest = (
                         <Repeat class="size-4 text-[#555] dark:text-[#aaa]" />
                     </span>
                     <div>
-                        <h2
+                        <DialogTitle
                             class="text-base font-semibold text-[#111] dark:text-white"
                         >
                             {{
@@ -160,14 +160,14 @@ const submitRequest = (
                                     ? 'Edit recurring task'
                                     : 'New recurring task'
                             }}
-                        </h2>
-                        <p class="text-[13px] text-[#999] dark:text-[#666]">
+                        </DialogTitle>
+                        <DialogDescription class="text-[13px] text-[#999] dark:text-[#666]">
                             {{
                                 isEditing
                                     ? 'Update the recurrence settings.'
                                     : 'Set a schedule that repeats automatically.'
                             }}
-                        </p>
+                        </DialogDescription>
                     </div>
                 </div>
                 <button

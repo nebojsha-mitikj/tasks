@@ -25,7 +25,7 @@ defineProps<{
     <AuthBase
         title="Log in to your account"
         description="Enter your email and password below to log in"
-        :nav-href="canRegister ? register() : undefined"
+        :nav-href="canRegister ? register.url() : undefined"
         :nav-label="canRegister ? 'Register' : undefined"
     >
         <!-- Status -->

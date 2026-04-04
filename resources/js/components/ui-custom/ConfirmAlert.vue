@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { AlertTriangle } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -48,14 +48,14 @@ const submit = (): void => {
                         <AlertTriangle class="size-4 text-red-500" />
                     </span>
                     <div>
-                        <h2
+                        <AlertDialogTitle
                             class="text-base font-semibold text-[#111] dark:text-white"
                         >
                             {{ props.title }}
-                        </h2>
-                        <p class="text-[13px] text-[#999] dark:text-[#666]">
+                        </AlertDialogTitle>
+                        <AlertDialogDescription class="text-[13px] text-[#999] dark:text-[#666]">
                             {{ props.description }}
-                        </p>
+                        </AlertDialogDescription>
                     </div>
                 </div>
             </div>

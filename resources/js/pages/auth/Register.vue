@@ -17,7 +17,7 @@ import { Form, Head } from '@inertiajs/vue3';
     <AuthBase
         title="Create an account"
         description="Enter your details below to create your account"
-        :nav-href="login()"
+        :nav-href="login.url()"
         nav-label="Log in"
     >
         <!-- Form -->
@@ -115,12 +115,7 @@ import { Form, Head } from '@inertiajs/vue3';
             <!-- Footer -->
             <div class="text-center text-sm text-muted-foreground">
                 Already have an account?
-                <TextLink
-                    :href="login()"
-                    :tabindex="6"
-                >
-                    Log in
-                </TextLink>
+                <TextLink :href="login()" :tabindex="6"> Log in </TextLink>
             </div>
         </Form>
     </AuthBase>

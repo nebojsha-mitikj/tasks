@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { store, update } from '@/actions/App/Http/Controllers/LabelController';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import type { AppPageProps } from '@/types';
 import type { CreateLabelPayload } from '@/types/labels/CreateLabelPayload';
 import type { Label } from '@/types/labels/Label';
@@ -88,18 +88,18 @@ const submitRequest = (payload: RequestPayload & CreateLabelPayload): void => {
                         <Tag class="size-4 text-[#555] dark:text-[#aaa]" />
                     </span>
                     <div>
-                        <h2
+                        <DialogTitle
                             class="text-base font-semibold text-[#111] dark:text-white"
                         >
                             {{ isEditing ? 'Edit label' : 'New label' }}
-                        </h2>
-                        <p class="text-[13px] text-[#999] dark:text-[#666]">
+                        </DialogTitle>
+                        <DialogDescription class="text-[13px] text-[#999] dark:text-[#666]">
                             {{
                                 isEditing
                                     ? 'Rename this label.'
                                     : 'Organize tasks with a label.'
                             }}
-                        </p>
+                        </DialogDescription>
                     </div>
                 </div>
                 <button
