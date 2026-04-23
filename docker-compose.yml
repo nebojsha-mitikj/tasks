@@ -1,0 +1,62 @@
+services:
+  php:
+    image: ghcr.io/nebojsha-mitikj/tasks:${IMAGE_TAG:-latest}
+    container_name: tasks-php
+    restart: unless-stopped
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-eu-west-1}
+        awslogs-group: /tasks/production
+        awslogs-stream: php
+        awslogs-create-group: "true"
+    networks:
+      - internal
+
+  nginx:
+    image: ghcr.io/nebojsha-mitikj/tasks-nginx:${IMAGE_TAG:-latest}
+    container_name: tasks-web
+    restart: unless-stopped
+    depends_on:
+      php:
+        condition: service_healthy
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-eu-west-1}
+        awslogs-group: /tasks/production
+        awslogs-stream: nginx
+        awslogs-create-group: "true"
+    networks:
+      - internal
+      - shared-proxy
+
+  # Uncomment when queued jobs are introduced:
+  # worker:
+  #   image: ghcr.io/nebojsha-mitikj/tasks:${IMAGE_TAG:-latest}
+  #   container_name: tasks-worker
+  #   restart: unless-stopped
+  #   env_file: .env
+  #   command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+  #   logging:
+  #     driver: awslogs
+  #     options:
+  #       awslogs-region: ${AWS_REGION:-eu-west-1}
+  #       awslogs-group: /tasks/production
+  #       awslogs-stream: worker
+  #       awslogs-create-group: "true"
+  #   networks:
+  #     - internal
+
+networks:
+  internal:
+    driver: bridge
+  shared-proxy:
+    external: true
