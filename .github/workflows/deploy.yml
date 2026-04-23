@@ -64,7 +64,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: .env
-          target: /var/www/html/tasks/
+          target: /home/ubuntu/docker-apps/tasks/
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
@@ -79,7 +79,7 @@ jobs:
           script: |
             set -e
 
-            cd /var/www/html/tasks
+            cd /home/ubuntu/docker-apps/tasks
 
             echo "$GHCR_TOKEN" | docker login ghcr.io -u nebojsha-mitikj --password-stdin
 
