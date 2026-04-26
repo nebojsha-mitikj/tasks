@@ -21,10 +21,12 @@ WORKDIR /var/www/html
 
 COPY --from=composer /app .
 
-# Install frontend dependencies and build
-# wayfinder plugin needs php artisan available during build
+# wayfinder Vite plugin calls `php artisan wayfinder:generate` at build start.
+# A minimal .env is needed so artisan can boot without a real DB connection.
 COPY package*.json ./
-RUN npm ci --ignore-scripts && npm run build && rm -rf node_modules
+RUN printf 'APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nDB_CONNECTION=sqlite\nDB_DATABASE=:memory:\n' > .env \
+    && npm ci --ignore-scripts && npm run build \
+    && rm -rf node_modules .env
 
 # PHP config
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
