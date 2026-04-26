@@ -1,16 +1,4 @@
-# ---- Stage 1: Build frontend assets ----
-FROM node:22-alpine AS frontend
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --ignore-scripts
-
-COPY . .
-RUN npm run build
-
-
-# ---- Stage 2: Composer dependencies ----
+# ---- Stage 1: Composer dependencies ----
 FROM composer:2 AS composer
 
 WORKDIR /app
@@ -22,20 +10,21 @@ COPY . .
 RUN composer dump-autoload --no-dev --optimize
 
 
-# ---- Stage 3: PHP-FPM application ----
+# ---- Stage 2: PHP-FPM application + frontend build ----
 FROM php:8.4-fpm-alpine AS app
 
 # fcgi provides cgi-fcgi binary used for the healthcheck
-RUN apk add --no-cache fcgi libpng-dev libzip-dev oniguruma-dev \
+RUN apk add --no-cache fcgi libpng-dev libzip-dev oniguruma-dev nodejs npm \
     && docker-php-ext-install pdo_mysql mbstring zip opcache
 
 WORKDIR /var/www/html
 
 COPY --from=composer /app .
 
-
-# Copy built Vite assets
-COPY --from=frontend /app/public/build ./public/build
+# Install frontend dependencies and build
+# wayfinder plugin needs php artisan available during build
+COPY package*.json ./
+RUN npm ci --ignore-scripts && npm run build && rm -rf node_modules
 
 # PHP config
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
@@ -46,7 +35,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 
-# ---- Stage 4: Nginx ----
+# ---- Stage 3: Nginx ----
 FROM nginx:alpine AS nginx
 
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
