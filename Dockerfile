@@ -14,18 +14,22 @@ RUN composer dump-autoload --no-dev --optimize
 FROM php:8.4-fpm-alpine AS app
 
 # fcgi provides cgi-fcgi binary used for the healthcheck
-RUN apk add --no-cache fcgi libpng-dev libzip-dev oniguruma-dev nodejs npm \
-    && docker-php-ext-install pdo_mysql mbstring zip opcache
+# sqlite-dev needed so artisan can boot with DB_CONNECTION=sqlite during the frontend build
+RUN apk add --no-cache fcgi libpng-dev libzip-dev oniguruma-dev sqlite-dev nodejs npm \
+    && docker-php-ext-install pdo_mysql pdo_sqlite mbstring zip opcache
 
 WORKDIR /var/www/html
 
 COPY --from=composer /app .
 
-# wayfinder Vite plugin calls `php artisan wayfinder:generate` at build start.
-# A minimal .env is needed so artisan can boot without a real DB connection.
+# wayfinder Vite plugin calls `php artisan wayfinder:generate` during build.
+# We run it explicitly first so any artisan errors are visible in CI logs,
+# and the generated files already exist when Vite runs it again.
 COPY package*.json ./
 RUN printf 'APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nDB_CONNECTION=sqlite\nDB_DATABASE=:memory:\n' > .env \
-    && npm ci --ignore-scripts && npm run build \
+    && php artisan wayfinder:generate --with-form \
+    && npm ci --ignore-scripts \
+    && npm run build \
     && rm -rf node_modules .env
 
 # PHP config
