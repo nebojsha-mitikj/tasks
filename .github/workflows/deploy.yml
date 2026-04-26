@@ -80,6 +80,7 @@ jobs:
             set -e
 
             cd /home/ubuntu/docker-apps/tasks
+            git pull
 
             echo "$GHCR_TOKEN" | docker login ghcr.io -u nebojsha-mitikj --password-stdin
 
