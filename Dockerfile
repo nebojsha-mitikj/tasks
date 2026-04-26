@@ -26,7 +26,8 @@ COPY --from=composer /app .
 # We run it explicitly first so any artisan errors are visible in CI logs,
 # and the generated files already exist when Vite runs it again.
 COPY package*.json ./
-RUN printf 'APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nDB_CONNECTION=sqlite\nDB_DATABASE=:memory:\n' > .env \
+RUN mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs \
+    && printf 'APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nDB_CONNECTION=sqlite\nDB_DATABASE=:memory:\n' > .env \
     && php artisan wayfinder:generate --with-form \
     && npm ci --ignore-scripts \
     && npm run build \
