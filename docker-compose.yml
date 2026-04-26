@@ -10,13 +10,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: ${AWS_REGION:-eu-west-1}
-        awslogs-group: /tasks/production
-        awslogs-stream: php
-        awslogs-create-group: "true"
     networks:
       - internal
 
@@ -27,13 +20,6 @@ services:
     depends_on:
       php:
         condition: service_healthy
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: ${AWS_REGION:-eu-west-1}
-        awslogs-group: /tasks/production
-        awslogs-stream: nginx
-        awslogs-create-group: "true"
     networks:
       - internal
       - shared-proxy
@@ -45,13 +31,6 @@ services:
   #   restart: unless-stopped
   #   env_file: .env
   #   command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
-  #   logging:
-  #     driver: awslogs
-  #     options:
-  #       awslogs-region: ${AWS_REGION:-eu-west-1}
-  #       awslogs-group: /tasks/production
-  #       awslogs-stream: worker
-  #       awslogs-create-group: "true"
   #   networks:
   #     - internal
 
