@@ -32,8 +32,9 @@
 
         <title inertia>{{ config('app.name', 'Tasks') }}</title>
 
-        <link rel="icon" href="/favicon/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml">
+        <link rel="icon" type="image/png" sizes="48x48" href="/favicon/icons/icon-48x48.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon/icons/icon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon/icons/icon-16x16.png">
         <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
