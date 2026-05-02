@@ -11,8 +11,10 @@ import { LabelWithTasks } from '@/types/labels/Label';
 import type { Task } from '@/types/tasks/Task';
 import { formatDate } from '@/utils/date';
 import { Head } from '@inertiajs/vue3';
+import { today as intlToday, getLocalTimeZone } from '@internationalized/date';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
+const tomorrowDate = intlToday(getLocalTimeZone()).add({ days: 1 });
 
 const { tasksByDate, labels } = defineProps<{
     tasksByDate: Record<string, Task[]>;
@@ -75,6 +77,7 @@ const breadcrumbs: BreadcrumbItem[] = [
             v-model:open="dialogOpen"
             :task="editingTask"
             :labels="labels"
+            :default-date="tomorrowDate"
         />
         <CreateTaskButton @create="createTask" />
     </AppLayout>

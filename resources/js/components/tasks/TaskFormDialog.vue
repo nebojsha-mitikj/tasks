@@ -36,9 +36,10 @@ import { AcceptableValue } from 'reka-ui';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
-const { task, labels } = defineProps<{
+const { task, labels, defaultDate } = defineProps<{
     task: Task | null;
     labels: Label[];
+    defaultDate?: DateValue;
 }>();
 
 const date = ref<DateValue | undefined>();
@@ -48,7 +49,7 @@ const df = new DateFormatter('en-US', { dateStyle: 'long' });
 const isSubmitting = ref<boolean>(false);
 const title = ref<string>('');
 const description = ref<string>('');
-const priority = ref<TaskPriority | ''>('');
+const priority = ref<TaskPriority | ''>(TaskPriority.NONE);
 const page = usePage<AppPageProps>();
 const selectedLabelIds = ref<number[]>((task?.labels ?? []).map((l) => l.id));
 const open = defineModel<boolean>('open', { default: false });
@@ -64,8 +65,8 @@ const submitButtonText = computed(() => {
 const resetForm = () => {
     title.value = '';
     description.value = '';
-    date.value = undefined;
-    priority.value = '';
+    date.value = defaultDate;
+    priority.value = TaskPriority.NONE;
     selectedLabelIds.value = (task?.labels ?? []).map((l) => l.id);
 };
 

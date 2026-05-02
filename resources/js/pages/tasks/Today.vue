@@ -11,9 +11,11 @@ import type { Label } from '@/types/labels/Label';
 import { type Task } from '@/types/tasks/Task';
 import { countCompleted } from '@/utils/taskCounts';
 import { Head } from '@inertiajs/vue3';
+import { today as intlToday, getLocalTimeZone } from '@internationalized/date';
 import { computed } from 'vue';
 
 const { dialogOpen, editingTask, editTask, createTask } = useTaskDialog();
+const todayDate = intlToday(getLocalTimeZone());
 const { tasks, labels } = defineProps<{
     tasks: Task[];
     labels: Label[];
@@ -92,6 +94,7 @@ const allDone = computed(
             :labels="labels"
             v-model:open="dialogOpen"
             :task="editingTask"
+            :default-date="todayDate"
         />
         <CreateTaskButton @create="createTask" />
     </AppLayout>
