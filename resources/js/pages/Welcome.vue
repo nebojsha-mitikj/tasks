@@ -159,7 +159,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head title="nebbo" />
+    <Head />
 
     <div
         class="flex min-h-screen flex-col bg-white text-[#111] dark:bg-[#0a0a0a] dark:text-white"
